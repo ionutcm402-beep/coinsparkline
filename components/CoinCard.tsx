@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Coin } from "@/types/coin";
+import { getSignalTier, TIER_CONFIG } from "@/lib/tiers";
+import SignalSparkline from "@/components/SignalSparkline";
 
 function formatPrice(price: number): string {
   const decimals = price >= 1 ? 2 : 4;
@@ -10,8 +12,9 @@ function formatPrice(price: number): string {
 }
 
 export default function CoinCard({ coin }: { coin: Coin }) {
-  const isCalm = coin.regimeState === "calm";
   const changeIsPositive = coin.change24hPct >= 0;
+  const tier = getSignalTier(coin);
+  const config = TIER_CONFIG[tier];
 
   return (
     <Link
@@ -29,19 +32,29 @@ export default function CoinCard({ coin }: { coin: Coin }) {
       </div>
 
       <p className="text-lg font-semibold text-gray-900">${formatPrice(coin.price)}</p>
-      <p className={`mb-2.5 text-xs ${changeIsPositive ? "text-green-600" : "text-red-600"}`}>
+      <p className={`mb-2 text-xs ${changeIsPositive ? "text-green-600" : "text-red-600"}`}>
         {changeIsPositive ? "+" : ""}
         {coin.change24hPct.toFixed(2)}% 24h
       </p>
 
-      <div
-        className={
-          isCalm
-            ? "rounded-md bg-green-50 py-1.5 text-center text-xs font-medium text-green-700"
-            : "rounded-md bg-red-50 py-1.5 text-center text-xs font-medium text-red-700"
-        }
-      >
-        {isCalm ? "Calm" : "Volatile"}
+      {coin.recentStates && coin.recentStates.length > 0 && (
+        <div className="mb-2.5">
+          <SignalSparkline states={coin.recentStates} />
+        </div>
+      )}
+
+      {/* The dominant element on the card -- this is the actual product */}
+      <div className={`rounded-lg ${config.bg} px-3 py-2 text-center`}>
+        <p className={`text-sm font-bold ${config.text}`}>{config.label.toUpperCase()}</p>
+        <div className="mt-1.5 h-1.5 w-full rounded-full bg-white/60">
+          <div
+            className="h-1.5 rounded-full transition-all"
+            style={{ width: `${coin.confidencePct}%`, backgroundColor: config.dot }}
+          />
+        </div>
+        <p className={`mt-1 text-[10px] ${config.text} opacity-80`}>
+          Signal {coin.confidencePct.toFixed(0)}% &middot; {coin.streakDays}d streak
+        </p>
       </div>
     </Link>
   );
