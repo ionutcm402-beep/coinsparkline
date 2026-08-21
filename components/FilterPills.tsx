@@ -8,7 +8,7 @@ interface FilterPillsProps {
 
 export default function FilterPills({ categories, active, onChange }: FilterPillsProps) {
   return (
-    <div className="flex flex-wrap gap-2 px-6">
+    <div className="flex flex-wrap gap-2">
       {categories.map((category) => {
         const isActive = category === active;
         return (

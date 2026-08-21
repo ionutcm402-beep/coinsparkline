@@ -20,7 +20,9 @@ export default function HomeClient({ coins, categories }: HomeClientProps) {
 
   return (
     <>
-      <FilterPills categories={categories} active={activeCategory} onChange={setActiveCategory} />
+      <div className="mx-auto max-w-6xl px-6">
+        <FilterPills categories={categories} active={activeCategory} onChange={setActiveCategory} />
+      </div>
       <main className="mx-auto max-w-6xl px-6 py-6">
         {filteredCoins.length === 0 ? (
           <p className="py-12 text-center text-sm text-gray-400">
