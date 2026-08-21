@@ -17,7 +17,7 @@ export default function FilterPills({ categories, active, onChange }: FilterPill
             onClick={() => onChange(category)}
             className={
               isActive
-                ? "rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 transition-colors"
+                ? "rounded-full border border-blue-50 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 transition-colors"
                 : "rounded-full border border-gray-200 px-4 py-1.5 text-sm text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900"
             }
           >
