@@ -25,6 +25,8 @@ export async function runScan(n: number, days: number, apiKey?: string): Promise
         streakDays: fit.streakDays,
         medianDaysToFlip: Math.round(fit.medianDaysToFlip * 10) / 10,
         logoUrl: meta.image,
+        marketCap: meta.market_cap,
+        recentStates: fit.hiddenStates.slice(-30),
       });
     } catch {
       // Skip coins that fail to fetch/fit -- one bad coin shouldn't kill the whole scan.
