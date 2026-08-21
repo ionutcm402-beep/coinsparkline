@@ -77,6 +77,7 @@ export async function fetchPriceHistory(
 }
 
 export interface CoinDetails {
+  symbol: string;
   description: string;
   homepage: string | null;
   currentPrice: number | null;
@@ -110,6 +111,7 @@ export async function fetchCoinDetails(coinId: string, apiKey?: string): Promise
     const homepage = homepageList.find((h) => h) || null;
 
     return {
+      symbol: (data.symbol || coinId.slice(0, 5)).toUpperCase(),
       description,
       homepage,
       currentPrice: md.current_price?.usd ?? null,
