@@ -2,6 +2,11 @@ import { put, list } from "@vercel/blob";
 import { Coin } from "@/types/coin";
 
 const BLOB_PATHNAME = "latest-scan.json";
+// Using a custom prefix ("PUBLICBLOB") on the Vercel Blob connection since
+// this project already had a private store using the default "BLOB" prefix.
+// @vercel/blob's put()/list() don't auto-detect a custom-prefixed token, so
+// it has to be passed explicitly here.
+const BLOB_TOKEN = process.env.PUBLICBLOB_READ_WRITE_TOKEN;
 
 export interface ScanSnapshot {
   coins: Coin[];
@@ -14,6 +19,7 @@ export async function saveScanSnapshot(snapshot: ScanSnapshot): Promise<void> {
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",
+    token: BLOB_TOKEN,
   });
 }
 
@@ -22,7 +28,7 @@ export async function saveScanSnapshot(snapshot: ScanSnapshot): Promise<void> {
 // reason -- callers should fall back to placeholder data rather than crash.
 export async function getLatestScan(): Promise<ScanSnapshot | null> {
   try {
-    const { blobs } = await list({ prefix: BLOB_PATHNAME, limit: 1 });
+    const { blobs } = await list({ prefix: BLOB_PATHNAME, limit: 1, token: BLOB_TOKEN });
     if (blobs.length === 0) return null;
     const resp = await fetch(blobs[0].url, { cache: "no-store" });
     if (!resp.ok) return null;
