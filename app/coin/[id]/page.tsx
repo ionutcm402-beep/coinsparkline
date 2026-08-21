@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
+import { getLatestScan } from "@/lib/blobStorage";
 import { mockCoins } from "@/lib/mockData";
+
+export const revalidate = 300;
 
 export default async function CoinDetailPage({
   params,
@@ -9,7 +12,9 @@ export default async function CoinDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const coin = mockCoins.find((c) => c.id === id);
+  const snapshot = await getLatestScan();
+  const coins = snapshot && snapshot.coins.length > 0 ? snapshot.coins : mockCoins;
+  const coin = coins.find((c) => c.id === id);
 
   if (!coin) {
     notFound();
@@ -49,10 +54,30 @@ export default async function CoinDetailPage({
             ${coin.price.toLocaleString()}
           </p>
 
-          <p className="mt-6 text-sm text-gray-400">
-            Full profile page (chart, tokenomics, news, videos) coming in Step 3 of the
-            build. This is placeholder data, not live.
-          </p>
+          <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-4 text-sm">
+            <div>
+              <p className="text-gray-400">Confidence</p>
+              <p className="font-medium text-gray-900">{coin.confidencePct}%</p>
+            </div>
+            <div>
+              <p className="text-gray-400">24h change</p>
+              <p className={coin.change24hPct >= 0 ? "font-medium text-green-600" : "font-medium text-red-600"}>
+                {coin.change24hPct >= 0 ? "+" : ""}
+                {coin.change24hPct.toFixed(2)}%
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-400">Median days to flip</p>
+              <p className="font-medium text-gray-900">{coin.medianDaysToFlip}</p>
+            </div>
+          </div>
+
+          {!snapshot && (
+            <p className="mt-6 text-sm text-gray-400">
+              This is placeholder data. Live data (chart, tokenomics, news, videos) appears
+              after the first daily scan runs, and the full profile page is coming in Step 3.
+            </p>
+          )}
         </div>
       </main>
     </div>

@@ -1,39 +1,37 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import FilterPills from "@/components/FilterPills";
-import CoinCard from "@/components/CoinCard";
+import HomeClient from "@/components/HomeClient";
+import { getLatestScan } from "@/lib/blobStorage";
 import { mockCoins, categories } from "@/lib/mockData";
 
-export default function Home() {
-  const [activeCategory, setActiveCategory] = useState("All coins");
+// Revalidate this page's cache every 5 minutes. Cheap to do even though the
+// underlying data only truly changes once a day (the cron schedule) --
+// this just controls how quickly a fresh cron run becomes visible to visitors.
+export const revalidate = 300;
 
-  const filteredCoins = useMemo(() => {
-    if (activeCategory === "All coins") return mockCoins;
-    return mockCoins.filter((coin) => coin.category === activeCategory);
-  }, [activeCategory]);
+export default async function Home() {
+  const snapshot = await getLatestScan();
+  const coins = snapshot && snapshot.coins.length > 0 ? snapshot.coins : mockCoins;
+  const isLiveData = Boolean(snapshot);
 
   return (
     <div className="flex-1 bg-gray-50">
       <Header />
       <Hero />
-      <FilterPills categories={categories} active={activeCategory} onChange={setActiveCategory} />
 
-      <main className="mx-auto max-w-6xl px-6 py-6">
-        {filteredCoins.length === 0 ? (
-          <p className="py-12 text-center text-sm text-gray-400">
-            No coins in this category yet.
+      <div className="mx-auto max-w-6xl px-6">
+        {isLiveData ? (
+          <p className="mb-4 text-xs text-gray-400">
+            Last updated {new Date(snapshot!.scannedAt).toLocaleString()}
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {filteredCoins.map((coin) => (
-              <CoinCard key={coin.id} coin={coin} />
-            ))}
-          </div>
+          <p className="mb-4 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-700">
+            Showing placeholder data. Live data appears after the first daily scan runs.
+          </p>
         )}
-      </main>
+      </div>
+
+      <HomeClient coins={coins} categories={categories} />
     </div>
   );
 }

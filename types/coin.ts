@@ -10,5 +10,6 @@ export interface Coin {
   regimeState: RegimeState;
   confidencePct: number;
   streakDays: number;
+  medianDaysToFlip: number;
   logoUrl?: string;
 }
