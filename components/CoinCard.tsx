@@ -46,7 +46,7 @@ export default function CoinCard({ coin }: { coin: Coin }) {
       {/* The dominant element on the card -- this is the actual product */}
       <div className={`rounded-lg ${config.bg} px-3 py-2 text-center`}>
         <p className={`text-sm font-bold ${config.text}`}>{config.label.toUpperCase()}</p>
-        <div className="mt-1.5 h-1.5 w-full rounded-full bg-white/60">
+        <div className="mt-1.5 h-1.5 w-full rounded-full bg-cyan-50/70">
           <div
             className="h-1.5 rounded-full transition-all"
             style={{ width: `${coin.confidencePct}%`, backgroundColor: config.dot }}
