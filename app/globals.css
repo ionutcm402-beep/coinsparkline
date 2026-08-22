@@ -35,10 +35,10 @@ body {
      these are all very low-opacity, large, soft gradients, not solid color. */
   background-color: #ffffff;
   background-image:
-    radial-gradient(ellipse 900px 600px at 8% -5%, rgba(37, 99, 235, 0.07), transparent 60%),
-    radial-gradient(ellipse 900px 700px at 100% 15%, rgba(139, 92, 246, 0.05), transparent 55%),
-    radial-gradient(ellipse 1000px 800px at 90% 100%, rgba(236, 72, 153, 0.05), transparent 55%),
-    radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+    radial-gradient(ellipse 900px 600px at 8% -5%, rgba(37, 99, 235, 0.10), transparent 60%),
+    radial-gradient(ellipse 900px 700px at 100% 15%, rgba(139, 92, 246, 0.08), transparent 55%),
+    radial-gradient(ellipse 1000px 800px at 90% 100%, rgba(236, 72, 153, 0.08), transparent 55%),
+    radial-gradient(circle, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
   background-size: auto, auto, auto, 28px 28px;
   background-attachment: fixed, fixed, fixed, fixed;
   background-repeat: no-repeat, no-repeat, no-repeat, repeat;
