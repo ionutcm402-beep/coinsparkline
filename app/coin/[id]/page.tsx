@@ -67,7 +67,12 @@ export default async function CoinDetailPage({
   return (
     <div className="flex-1">
       <Header />
-      <main className="mx-auto max-w-[900px] px-6 py-8">
+      <main className="mx-auto max-w-[1240px] px-6 py-8">
+        {/* Outer container matches the site-wide 1240px standard; the actual
+            card content stays at a comfortable, balanced width nested and
+            centered inside it, rather than stretching a single card the
+            full page width (which would look sparse, not premium). */}
+        <div className="mx-auto max-w-4xl">
         <Link href="/" className="text-sm text-gray-500 hover:text-gray-900">
           &larr; Back to all coins
         </Link>
@@ -284,6 +289,7 @@ export default async function CoinDetailPage({
               )}
             </div>
           )}
+        </div>
         </div>
       </main>
     </div>
