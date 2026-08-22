@@ -39,7 +39,7 @@ function Wordmark() {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-10 border-b border-white/60 bg-white/80 shadow-[0_1px_12px_rgba(37,99,235,0.06)] backdrop-blur-md">
+    <header className="sticky top-0 z-10 border-b border-[#e2e8f5] bg-white/85 shadow-[0_2px_16px_rgba(37,99,235,0.08)] backdrop-blur-md">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-y-2 px-6 py-4">
         <Link href="/" className="flex items-center gap-2.5">
           <LogoMark />
