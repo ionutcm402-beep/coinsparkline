@@ -17,8 +17,8 @@ export interface RegimeTransition {
 }
 
 export interface RegimeFit {
-  hiddenStates: number[]; // 0 = calm, 1 = volatile, aligned to `dates`
-  stateProbs: number[][]; // [obs][state]
+  hiddenStates: number[];
+  stateProbs: number[][];
   transmat: number[][];
   dates: string[];
   closes: number[];
@@ -27,10 +27,10 @@ export interface RegimeFit {
   streakDays: number;
   medianDaysToFlip: number;
   meanDaysToFlip: number;
-  transitions: RegimeTransition[]; // every real regime change found in the history, oldest first
-  previousStreakDays: number | null; // length of the streak immediately before this one (null if none)
+  transitions: RegimeTransition[];
+  previousStreakDays: number | null;
   previousState: number | null;
-  longestStreakByState: [number, number]; // [longest calm streak, longest volatile streak] ever observed
+  longestStreakByState: [number, number];
 }
 
 export function buildFeatures(prices: PricePoint[], volWindow = 12): { X: number[][]; dates: string[]; closes: number[] } {
