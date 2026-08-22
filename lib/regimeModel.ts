@@ -10,6 +10,12 @@ export interface PricePoint {
   close: number;
 }
 
+export interface RegimeTransition {
+  date: string;
+  fromState: number;
+  toState: number;
+}
+
 export interface RegimeFit {
   hiddenStates: number[]; // 0 = calm, 1 = volatile, aligned to `dates`
   stateProbs: number[][]; // [obs][state]
@@ -21,6 +27,10 @@ export interface RegimeFit {
   streakDays: number;
   medianDaysToFlip: number;
   meanDaysToFlip: number;
+  transitions: RegimeTransition[]; // every real regime change found in the history, oldest first
+  previousStreakDays: number | null; // length of the streak immediately before this one (null if none)
+  previousState: number | null;
+  longestStreakByState: [number, number]; // [longest calm streak, longest volatile streak] ever observed
 }
 
 export function buildFeatures(prices: PricePoint[], volWindow = 12): { X: number[][]; dates: string[]; closes: number[] } {
@@ -81,6 +91,32 @@ export function fitRegime(prices: PricePoint[], minObservations = 40): RegimeFit
   let streakDays = 1;
   for (let i = n - 2; i >= 0 && hiddenStates[i] === currentState; i--) streakDays++;
 
+  // Walk the full history once to find every real regime transition, the
+  // streak immediately before the current one, and the longest streak ever
+  // observed for each state -- all directly derived from real hidden states.
+  const transitions: RegimeTransition[] = [];
+  const streakLengths: number[] = [];
+  const streakStates: number[] = [];
+  let runStart = 0;
+  for (let i = 1; i <= n; i++) {
+    if (i === n || hiddenStates[i] !== hiddenStates[runStart]) {
+      streakLengths.push(i - runStart);
+      streakStates.push(hiddenStates[runStart]);
+      if (i < n) {
+        transitions.push({ date: dates[i], fromState: hiddenStates[i - 1], toState: hiddenStates[i] });
+      }
+      runStart = i;
+    }
+  }
+  const previousStreakDays = streakLengths.length >= 2 ? streakLengths[streakLengths.length - 2] : null;
+  const previousState = streakStates.length >= 2 ? streakStates[streakStates.length - 2] : null;
+
+  const longestStreakByState: [number, number] = [0, 0];
+  for (let i = 0; i < streakLengths.length; i++) {
+    const s = streakStates[i];
+    if (streakLengths[i] > longestStreakByState[s]) longestStreakByState[s] = streakLengths[i];
+  }
+
   const pStay = Math.min(transmat[currentState][currentState], 0.999999);
   const medianDaysToFlip = Math.log(0.5) / Math.log(pStay);
   const meanDaysToFlip = 1 / (1 - pStay);
@@ -96,5 +132,9 @@ export function fitRegime(prices: PricePoint[], minObservations = 40): RegimeFit
     streakDays,
     medianDaysToFlip,
     meanDaysToFlip,
+    transitions: transitions.reverse(), // most recent first, for display
+    previousStreakDays,
+    previousState,
+    longestStreakByState,
   };
 }
