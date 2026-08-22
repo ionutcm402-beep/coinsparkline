@@ -23,8 +23,8 @@ function ChartDecoration() {
       ))}
       <defs>
         <linearGradient id="hero-bar-gradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2563eb" />
-          <stop offset="1" stopColor="#8b5cf6" />
+          <stop offset="0" stopColor="var(--brand-blue)" />
+          <stop offset="1" stopColor="var(--brand-violet)" />
         </linearGradient>
       </defs>
     </svg>
@@ -35,7 +35,7 @@ export default function Hero() {
   return (
     <div className="relative mx-auto max-w-[1240px] overflow-hidden px-6 pt-10 pb-6 text-center">
       <ChartDecoration />
-      <h1 className="relative text-2xl font-semibold text-[#0f172a] sm:text-3xl">
+      <h1 className="relative text-2xl font-semibold text-brand-navy sm:text-3xl">
         Track the calm. Catch the move.
       </h1>
       <p className="relative mt-2 text-sm text-gray-500 sm:text-base">
