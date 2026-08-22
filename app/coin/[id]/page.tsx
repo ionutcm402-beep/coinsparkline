@@ -193,29 +193,29 @@ export default async function CoinDetailPage({
 
           {/* Buttons */}
           <div className="mt-6 grid grid-cols-2 gap-3 border-t border-gray-100 pt-4 sm:grid-cols-3">
-            <a
+            
               href={`https://www.coingecko.com/en/coins/${id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-[#2563eb]/40 hover:bg-blue-50/50 hover:text-[#2563eb]"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-brand-blue/40 hover:bg-brand-blue/5 hover:text-brand-blue"
             >
               View on CoinGecko ↗
             </a>
             {details?.homepage && (
-              <a
+              
                 href={details.homepage}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-[#2563eb]/40 hover:bg-blue-50/50 hover:text-[#2563eb]"
+                className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-brand-blue/40 hover:bg-brand-blue/5 hover:text-brand-blue"
               >
                 Official website ↗
               </a>
             )}
-            <a
+            
               href={`https://x.com/search?q=${xQuery}&src=typed_query&f=live`}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-[#2563eb]/40 hover:bg-blue-50/50 hover:text-[#2563eb]"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-brand-blue/40 hover:bg-brand-blue/5 hover:text-brand-blue"
             >
               Search X ↗
             </a>
@@ -238,7 +238,7 @@ export default async function CoinDetailPage({
                   <ul className="space-y-3">
                     {news.map((article, i) => (
                       <li key={i}>
-                        <a
+                        
                           href={article.url}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -267,7 +267,7 @@ export default async function CoinDetailPage({
                           <img src={video.thumbnail} alt="" className="h-12 w-20 rounded object-cover" />
                         )}
                         <div>
-                          <a
+                          
                             href={video.url}
                             target="_blank"
                             rel="noopener noreferrer"
