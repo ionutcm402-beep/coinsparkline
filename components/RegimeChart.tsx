@@ -1,140 +1,119 @@
-// Port of regime_model.py's build_features + fit_hmm. Converts a raw price
-// series into log-returns + rolling volatility, fits the 2-state HMM, and
-// relabels states so 0 = calmest ("stasis") and 1 = most volatile
-// ("punctuation") -- HMM label order is otherwise arbitrary.
+"use client";
 
-import { fitGaussianHmm } from "./hmm";
+import { useMemo, useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-export interface PricePoint {
-  date: string; // ISO date
-  close: number;
-}
-
-export interface RegimeTransition {
+interface ChartPoint {
   date: string;
-  fromState: number;
-  toState: number;
+  close: number;
+  state: number; // 0 = calm, 1 = volatile
 }
 
-export interface RegimeFit {
-  hiddenStates: number[]; // 0 = calm, 1 = volatile, aligned to `dates`
-  stateProbs: number[][]; // [obs][state]
-  transmat: number[][];
-  dates: string[];
-  closes: number[];
-  currentState: number;
-  confidence: number;
-  streakDays: number;
-  medianDaysToFlip: number;
-  meanDaysToFlip: number;
-  transitions: RegimeTransition[]; // every real regime change found in the history, oldest first
-  previousStreakDays: number | null; // length of the streak immediately before this one (null if none)
-  previousState: number | null;
-  longestStreakByState: [number, number]; // [longest calm streak, longest volatile streak] ever observed
-}
+type Timeframe = "1M" | "3M" | "6M" | "1Y" | "ALL";
+const TIMEFRAME_DAYS: Record<Timeframe, number | null> = { "1M": 30, "3M": 90, "6M": 180, "1Y": 365, ALL: null };
 
-export function buildFeatures(prices: PricePoint[], volWindow = 12): { X: number[][]; dates: string[]; closes: number[] } {
-  const sorted = [...prices].sort((a, b) => a.date.localeCompare(b.date));
-  const logRet: number[] = [NaN];
-  for (let i = 1; i < sorted.length; i++) {
-    logRet.push(Math.log(sorted[i].close / sorted[i - 1].close));
-  }
+// Split a chronological point list into contiguous same-state runs, each
+// segment overlapping its neighbor by one point so the colored line
+// segments connect visually with no gap between them.
+function splitIntoSegments(points: ChartPoint[]) {
+  const segments: { state: number; data: { x: number; y: number }[] }[] = [];
+  let current: { x: number; y: number }[] = [];
+  let currentState = points[0]?.state;
 
-  const realizedVol: number[] = new Array(sorted.length).fill(NaN);
-  for (let i = 0; i < sorted.length; i++) {
-    if (i < volWindow) continue;
-    const window = logRet.slice(i - volWindow + 1, i + 1);
-    const mean = window.reduce((a, b) => a + b, 0) / window.length;
-    const variance = window.reduce((a, b) => a + (b - mean) ** 2, 0) / (window.length - 1);
-    realizedVol[i] = Math.sqrt(variance);
-  }
-
-  const X: number[][] = [];
-  const dates: string[] = [];
-  const closes: number[] = [];
-  for (let i = 0; i < sorted.length; i++) {
-    if (isNaN(logRet[i]) || isNaN(realizedVol[i])) continue;
-    X.push([logRet[i], realizedVol[i]]);
-    dates.push(sorted[i].date);
-    closes.push(sorted[i].close);
-  }
-
-  return { X, dates, closes };
-}
-
-export function fitRegime(prices: PricePoint[], minObservations = 40): RegimeFit | null {
-  const { X, dates, closes } = buildFeatures(prices);
-  if (X.length < minObservations) return null;
-
-  const fit = fitGaussianHmm(X, 2);
-
-  // Relabel by volatility: state 0 = calmest (lowest mean realized-vol feature)
-  const volByState = [0, 1].map((state) => {
-    const indices = fit.hiddenStates.map((s, i) => (s === state ? i : -1)).filter((i) => i >= 0);
-    if (indices.length === 0) return Infinity;
-    return indices.reduce((sum, i) => sum + X[i][1], 0) / indices.length;
-  });
-  const order = volByState[0] <= volByState[1] ? [0, 1] : [1, 0];
-  const relabel: Record<number, number> = { [order[0]]: 0, [order[1]]: 1 };
-
-  const hiddenStates = fit.hiddenStates.map((s) => relabel[s]);
-  const stateProbs = fit.stateProbs.map((row) => [row[order[0]], row[order[1]]]);
-  const transmat = [
-    [fit.transmat[order[0]][order[0]], fit.transmat[order[0]][order[1]]],
-    [fit.transmat[order[1]][order[0]], fit.transmat[order[1]][order[1]]],
-  ];
-
-  const n = hiddenStates.length;
-  const currentState = hiddenStates[n - 1];
-  const confidence = stateProbs[n - 1][currentState];
-
-  let streakDays = 1;
-  for (let i = n - 2; i >= 0 && hiddenStates[i] === currentState; i--) streakDays++;
-
-  // Walk the full history once to find every real regime transition, the
-  // streak immediately before the current one, and the longest streak ever
-  // observed for each state -- all directly derived from real hidden states.
-  const transitions: RegimeTransition[] = [];
-  const streakLengths: number[] = [];
-  const streakStates: number[] = [];
-  let runStart = 0;
-  for (let i = 1; i <= n; i++) {
-    if (i === n || hiddenStates[i] !== hiddenStates[runStart]) {
-      streakLengths.push(i - runStart);
-      streakStates.push(hiddenStates[runStart]);
-      if (i < n) {
-        transitions.push({ date: dates[i], fromState: hiddenStates[i - 1], toState: hiddenStates[i] });
-      }
-      runStart = i;
+  points.forEach((p, i) => {
+    const x = new Date(p.date).getTime();
+    if (p.state !== currentState) {
+      // close out the previous segment, include this point too so lines touch
+      current.push({ x, y: p.close });
+      segments.push({ state: currentState, data: current });
+      current = [{ x, y: p.close }];
+      currentState = p.state;
+    } else {
+      current.push({ x, y: p.close });
     }
-  }
-  const previousStreakDays = streakLengths.length >= 2 ? streakLengths[streakLengths.length - 2] : null;
-  const previousState = streakStates.length >= 2 ? streakStates[streakStates.length - 2] : null;
+    if (i === points.length - 1 && current.length > 0) {
+      segments.push({ state: currentState, data: current });
+    }
+  });
+  return segments;
+}
 
-  const longestStreakByState: [number, number] = [0, 0];
-  for (let i = 0; i < streakLengths.length; i++) {
-    const s = streakStates[i];
-    if (streakLengths[i] > longestStreakByState[s]) longestStreakByState[s] = streakLengths[i];
-  }
+export default function RegimeChart({ points }: { points: ChartPoint[] }) {
+  const [timeframe, setTimeframe] = useState<Timeframe>("ALL");
 
-  const pStay = Math.min(transmat[currentState][currentState], 0.999999);
-  const medianDaysToFlip = Math.log(0.5) / Math.log(pStay);
-  const meanDaysToFlip = 1 / (1 - pStay);
+  const filteredPoints = useMemo(() => {
+    const days = TIMEFRAME_DAYS[timeframe];
+    if (!days) return points;
+    const cutoff = Date.now() - days * 86400000;
+    return points.filter((p) => new Date(p.date).getTime() >= cutoff);
+  }, [points, timeframe]);
 
-  return {
-    hiddenStates,
-    stateProbs,
-    transmat,
-    dates,
-    closes,
-    currentState,
-    confidence,
-    streakDays,
-    medianDaysToFlip,
-    meanDaysToFlip,
-    transitions: transitions.reverse(), // most recent first, for display
-    previousStreakDays,
-    previousState,
-    longestStreakByState,
-  };
+  const segments = useMemo(() => splitIntoSegments(filteredPoints), [filteredPoints]);
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-700">Price &amp; market regime</p>
+          <p className="text-xs text-gray-400">Blue = Calm &middot; Red = Volatile</p>
+        </div>
+        <div className="flex gap-1">
+          {(Object.keys(TIMEFRAME_DAYS) as Timeframe[]).map((tf) => (
+            <button
+              key={tf}
+              onClick={() => setTimeframe(tf)}
+              className={
+                tf === timeframe
+                  ? "rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+                  : "rounded-md px-2 py-1 text-xs text-gray-400 hover:bg-gray-50"
+              }
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+          <XAxis
+            dataKey="x"
+            type="number"
+            domain={["dataMin", "dataMax"]}
+            tickFormatter={(v) => new Date(v).toLocaleDateString(undefined, { month: "short", year: "2-digit" })}
+            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            axisLine={{ stroke: "#e5e7eb" }}
+            allowDuplicatedCategory={false}
+          />
+          <YAxis
+            dataKey="y"
+            type="number"
+            domain={["auto", "auto"]}
+            tickFormatter={(v) => `$${v.toLocaleString()}`}
+            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            axisLine={{ stroke: "#e5e7eb" }}
+            width={70}
+          />
+          <Tooltip
+            formatter={(value) => [`$${Number(value).toLocaleString()}`, "Price"]}
+            labelFormatter={(v) => new Date(Number(v)).toLocaleDateString()}
+            contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }}
+          />
+          {segments.map((seg, i) => (
+            <Line
+              key={i}
+              data={seg.data}
+              dataKey="y"
+              type="monotone"
+              stroke={seg.state === 0 ? "#4c6ef5" : "#d6336c"}
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={false}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
