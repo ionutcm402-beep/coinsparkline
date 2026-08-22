@@ -36,10 +36,10 @@ export default function Hero() {
     <div className="relative mx-auto max-w-[1240px] overflow-hidden px-6 pt-10 pb-6 text-center">
       <ChartDecoration />
       <h1 className="relative text-2xl font-semibold text-[#0f172a] sm:text-3xl">
-        Know which coins are calm — and which are about to move
+        Track the calm. Catch the move.
       </h1>
       <p className="relative mt-2 text-sm text-gray-500 sm:text-base">
-        A regime signal for the crypto market, refreshed daily.
+        A regime signal for every major coin, showing which ones are calm and which are about to move.
       </p>
     </div>
   );
