@@ -94,7 +94,7 @@ export default async function CoinDetailPage({
             <p className={`text-2xl font-bold ${moodText}`}>{mood.toUpperCase()}</p>
 
             <div className="mt-3 flex items-center gap-3">
-              <div className="h-2 flex-1 rounded-full bg-white/70">
+              <div className="h-2 flex-1 rounded-full bg-cyan-50/80">
                 <div
                   className="h-2 rounded-full"
                   style={{ width: `${(fit.confidence * 100).toFixed(0)}%`, backgroundColor: moodDot }}
@@ -197,7 +197,7 @@ export default async function CoinDetailPage({
               href={`https://www.coingecko.com/en/coins/${id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 hover:border-gray-300"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-[#2563eb]/40 hover:bg-blue-50/50 hover:text-[#2563eb]"
             >
               View on CoinGecko ↗
             </a>
@@ -206,7 +206,7 @@ export default async function CoinDetailPage({
                 href={details.homepage}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 hover:border-gray-300"
+                className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-[#2563eb]/40 hover:bg-blue-50/50 hover:text-[#2563eb]"
               >
                 Official website ↗
               </a>
@@ -215,7 +215,7 @@ export default async function CoinDetailPage({
               href={`https://x.com/search?q=${xQuery}&src=typed_query&f=live`}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 hover:border-gray-300"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm text-gray-700 transition-colors hover:border-[#2563eb]/40 hover:bg-blue-50/50 hover:text-[#2563eb]"
             >
               Search X ↗
             </a>
