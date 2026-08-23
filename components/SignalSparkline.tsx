@@ -1,20 +1,10 @@
-// A tiny inline sparkline representing recent SIGNAL history (calm/volatile
-// per day), not raw price -- each bar is colored by that day's regime state.
+// Recent real daily regime states (0=calm, 1=volatile), rendered as a continuous signal trace.
 export default function SignalSparkline({ states }: { states: number[] }) {
-  if (!states || states.length === 0) return null;
-
-  return (
-    <div className="flex h-4 items-end gap-[1.5px]" aria-hidden="true">
-      {states.map((state, i) => (
-        <div
-          key={i}
-          className="w-[3px] flex-1 rounded-sm"
-          style={{
-            height: "100%",
-            backgroundColor: state === 0 ? "#a5d8ff" : "#ffc9c9",
-          }}
-        />
-      ))}
-    </div>
-  );
+  if (!states?.length) return null;
+  const points = states.map((state, index) => {
+    const x = states.length === 1 ? 50 : (index / (states.length - 1)) * 100;
+    return x.toFixed(2) + "," + (state === 0 ? "68" : "30");
+  }).join(" ");
+  return <svg className="csl-signal-trace" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Recent regime trajectory"><polyline points={points} fill="none" stroke="url(#signal-trace)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" /><defs><linearGradient id="signal-trace" x1="0" x2="1"><stop stopColor="var(--regime-calm)" /><stop offset="1" stopColor="var(--regime-volatile)" /></linearGradient></defs></svg>;
 }
+
