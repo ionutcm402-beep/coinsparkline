@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { runScan } from "@/lib/scanEngine";
 import { getLatestScan, saveScanSnapshot } from "@/lib/blobStorage";
+import { evaluateAndDeliverAlerts } from "@/lib/alertEngine";
 
 export const maxDuration = 60;
 
@@ -15,9 +16,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Deep signal analysis now covers the full top-200 universe. We scan it in
-    // rolling batches so the Hobby function stays safely within its time limit
-    // and CoinGecko is not hit with 200 historical requests at once.
     const total = Math.max(30, Math.min(Number(request.nextUrl.searchParams.get("total") || 200), 200));
     const batchSize = Math.max(10, Math.min(Number(request.nextUrl.searchParams.get("batch") || 30), 40));
     const requestedOffset = Number(request.nextUrl.searchParams.get("offset") || 0);
@@ -38,7 +36,16 @@ export async function GET(request: NextRequest) {
 
     const scannedAt = new Date().toISOString();
     await saveScanSnapshot({ coins, scannedAt });
+
+    let alertResult: Awaited<ReturnType<typeof evaluateAndDeliverAlerts>> | null = null;
+    try {
+      alertResult = await evaluateAndDeliverAlerts(coins, current?.coins ?? []);
+    } catch (alertError) {
+      alertResult = { evaluated: false, reason: alertError instanceof Error ? alertError.message : "Alert evaluation failed", events: 0, emails: 0 };
+    }
+
     revalidatePath("/");
+    revalidatePath("/alerts");
 
     return NextResponse.json({
       success: true,
@@ -49,6 +56,7 @@ export async function GET(request: NextRequest) {
       offset,
       batchSize,
       days,
+      alerts: alertResult,
       durationMs: Date.now() - startedAt,
     });
   } catch (err) {
