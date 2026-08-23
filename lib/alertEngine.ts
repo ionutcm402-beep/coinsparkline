@@ -1,0 +1,23 @@
+import { Coin } from "@/types/coin";
+import { getSignalTier } from "@/lib/tiers";
+import { getSparkScore } from "@/lib/sparkScore";
+
+interface AlertRuleRow { id:number; user_id:string; coin_id:string; rule_type:string; rule_value:string|null; enabled:boolean; last_fingerprint?:string|null; }
+interface Trigger { rule:AlertRuleRow; coin:Coin; subject:string; message:string; fingerprint:string; }
+const base=()=>process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/,"");
+const service=()=>process.env.SUPABASE_SERVICE_ROLE_KEY;
+const headers=()=>({apikey:service()!,Authorization:`Bearer ${service()!}`,"Content-Type":"application/json"});
+
+async function fetchRules():Promise<AlertRuleRow[]>{if(!base()||!service())return[];const r=await fetch(`${base()}/rest/v1/alert_rules?enabled=eq.true&select=id,user_id,coin_id,rule_type,rule_value,enabled,last_fingerprint`,{headers:headers(),cache:"no-store"});if(!r.ok)throw new Error(`Alert rules HTTP ${r.status}`);return r.json()}
+async function userEmail(userId:string){if(!base()||!service())return null;const r=await fetch(`${base()}/auth/v1/admin/users/${userId}`,{headers:headers(),cache:"no-store"});if(!r.ok)return null;const u=await r.json();return typeof u.email==="string"?u.email:null}
+async function markTriggered(id:number,fingerprint:string){await fetch(`${base()}/rest/v1/alert_rules?id=eq.${id}`,{method:"PATCH",headers:{...headers(),Prefer:"return=minimal"},body:JSON.stringify({last_triggered_at:new Date().toISOString(),last_fingerprint:fingerprint})})}
+async function sendEmail(to:string,subject:string,message:string){const key=process.env.RESEND_API_KEY,from=process.env.ALERT_FROM_EMAIL;if(!key||!from)return false;const r=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},body:JSON.stringify({from,to,subject,html:`<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto"><h2>CoinSparkLine</h2><p>${message}</p><p style="color:#64748b;font-size:12px">Behavioural market intelligence only. This is not investment advice or a prediction of return.</p></div>`})});return r.ok}
+
+function makeTrigger(rule:AlertRuleRow,coin:Coin,previous?:Coin):Trigger|null{const now=getSignalTier(coin),before=previous?getSignalTier(previous):null,spark=getSparkScore(coin).score;
+ if(rule.rule_type==="regime-change"&&before&&before!==now)return{rule,coin,subject:`${coin.symbol}: regime changed to ${now}`,message:`${coin.name} changed from ${before} to ${now}. SparkScore is ${spark}.`,fingerprint:`${coin.id}:regime:${before}>${now}`};
+ if(rule.rule_type==="entered-awakening"&&before&&before!=="awakening"&&now==="awakening")return{rule,coin,subject:`${coin.symbol} entered Awakening`,message:`${coin.name} has entered CoinSparkLine's Awakening regime. SparkScore is ${spark} with ${coin.confidencePct.toFixed(0)}% model confidence.`,fingerprint:`${coin.id}:awakening:${now}:${coin.streakDays}`};
+ if(rule.rule_type==="spark-threshold"){const threshold=Math.max(1,Math.min(100,Number(rule.rule_value)||70)),prev=previous?getSparkScore(previous).score:null;if(spark>=threshold&&(prev===null||prev<threshold))return{rule,coin,subject:`${coin.symbol}: SparkScore crossed ${threshold}`,message:`${coin.name}'s SparkScore is now ${spark}, crossing your ${threshold} activity threshold.`,fingerprint:`${coin.id}:spark:${threshold}:${spark}`};}
+ if(rule.rule_type==="heating-up"){const accel=coin.volatilityAccelerationPct??0,prevAccel=previous?.volatilityAccelerationPct??0;if(accel>=15&&prevAccel<15)return{rule,coin,subject:`${coin.symbol} is Heating Up`,message:`${coin.name}'s volatility acceleration is ${accel.toFixed(0)}% versus its recent baseline. Current regime: ${now}.`,fingerprint:`${coin.id}:heat:${Math.round(accel/5)*5}`};}
+ return null}
+
+export async function evaluateAlerts(current:Coin[],previous:Coin[]){if(!base()||!service())return{checked:0,triggered:0,sent:0,configured:false};const rules=await fetchRules(),nowMap=new Map(current.map(c=>[c.id,c])),oldMap=new Map(previous.map(c=>[c.id,c]));let triggered=0,sent=0;const emailCache=new Map<string,string|null>();for(const rule of rules){const coin=nowMap.get(rule.coin_id);if(!coin)continue;const hit=makeTrigger(rule,coin,oldMap.get(rule.coin_id));if(!hit||hit.fingerprint===rule.last_fingerprint)continue;triggered++;let email=emailCache.get(rule.user_id);if(email===undefined){email=await userEmail(rule.user_id);emailCache.set(rule.user_id,email)}if(email&&await sendEmail(email,hit.subject,hit.message)){sent++;await markTriggered(rule.id,hit.fingerprint)}}return{checked:rules.length,triggered,sent,configured:true}}
