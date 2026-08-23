@@ -7,6 +7,7 @@ import { getSignalTier, TIER_CONFIG } from "@/lib/tiers";
 import { getSparkScore } from "@/lib/sparkScore";
 import CurrencyAmount from "@/components/CurrencyAmount";
 import WatchlistButton from "@/components/WatchlistButton";
+import AlertRuleButton from "@/components/AlertRuleButton";
 
 export default function ScannerCard({ coin }: { coin: Coin }) {
   const [open,setOpen]=useState(false);
@@ -28,7 +29,7 @@ export default function ScannerCard({ coin }: { coin: Coin }) {
         <div className="mt-2 flex items-center justify-between rounded-lg bg-slate-950 px-2 py-1.5 text-white"><span className="text-[8px] font-bold uppercase tracking-[0.08em]">Spark {spark.score}</span><span className="text-[8px] text-slate-300">{spark.label}</span></div>
         <div className={`mt-2 rounded-lg ${config.bg} px-2 py-1.5`}><div className="flex items-center justify-between gap-1"><p className={`text-[8px] font-bold tracking-[0.08em] ${config.text}`}>{config.label.toUpperCase()}</p><p className={`text-[8px] ${config.text} opacity-70`}>{coin.confidencePct.toFixed(0)}%</p></div><div className="mt-1 h-[3px] w-full overflow-hidden rounded-full bg-white/70"><div className="h-full rounded-full" style={{ width: `${coin.confidencePct}%`, backgroundColor: config.dot }} /></div></div>
       </Link>
-      <button type="button" onClick={()=>setOpen(v=>!v)} className="mb-2 text-[8px] font-semibold uppercase tracking-[0.09em] text-slate-400 hover:text-slate-700">Why this signal? {open?"−":"+"}</button>
+      <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 px-2"><button type="button" onClick={()=>setOpen(v=>!v)} className="rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-slate-400 hover:text-slate-700">Why? {open?"−":"+"}</button><AlertRuleButton coinId={coin.id}/></div>
       {open&&<div className="border-t border-slate-100 bg-slate-50/80 px-3 py-2.5 text-left"><div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[8px]"><span className="text-slate-400">Confidence</span><strong className="text-right text-slate-700">{spark.confidence.toFixed(0)}</strong><span className="text-slate-400">Freshness</span><strong className="text-right text-slate-700">{spark.freshness.toFixed(0)}</strong><span className="text-slate-400">Flip pressure</span><strong className="text-right text-slate-700">{spark.transitionPressure.toFixed(0)}</strong><span className="text-slate-400">24h movement</span><strong className="text-right text-slate-700">{spark.marketMove.toFixed(0)}</strong></div><p className="mt-2 text-[8px] leading-4 text-slate-400">SparkScore describes behavioural activity, not expected return or a buy/sell recommendation.</p></div>}
     </article>
   );
