@@ -4,66 +4,33 @@ import { Coin } from "@/types/coin";
 const REGIMES: SignalTier[] = ["calm", "building", "awakening", "volatile"];
 
 function SignalPath() {
-  return (
-    <svg className="csl-hero-signal-svg" viewBox="0 0 1120 184" role="img" aria-label="A signal line progressing from calm through building and awakening to volatile market conditions">
-      <defs>
-        <filter id="csl-hero-soft-glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="5" /></filter>
-        <linearGradient id="csl-hero-ambient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="var(--regime-calm)" stopOpacity="0.08" />
-          <stop offset="0.42" stopColor="var(--regime-building)" stopOpacity="0.06" />
-          <stop offset="0.7" stopColor="var(--regime-awakening)" stopOpacity="0.08" />
-          <stop offset="1" stopColor="var(--regime-volatile)" stopOpacity="0.10" />
-        </linearGradient>
-      </defs>
-      <rect x="32" y="27" width="1056" height="112" rx="28" fill="url(#csl-hero-ambient)" />
-      <path className="csl-hero-baseline" d="M60 98 H1060" />
-      <path className="csl-hero-glow csl-hero-glow-calm" d="M60 98 C118 96 166 101 224 98 S318 96 352 98" />
-      <path className="csl-hero-glow csl-hero-glow-building" d="M352 98 C388 95 406 84 432 92 S470 108 500 96 S546 83 578 96" />
-      <path className="csl-hero-glow csl-hero-glow-awakening" d="M578 96 C606 75 628 116 659 86 S707 67 736 98 S774 119 803 75" />
-      <path className="csl-hero-glow csl-hero-glow-volatile" d="M803 75 C825 127 850 55 877 108 S929 48 953 112 S1000 42 1060 80" />
-      <path className="csl-hero-line csl-hero-line-calm" d="M60 98 C118 96 166 101 224 98 S318 96 352 98" />
-      <path className="csl-hero-line csl-hero-line-building" d="M352 98 C388 95 406 84 432 92 S470 108 500 96 S546 83 578 96" />
-      <path className="csl-hero-line csl-hero-line-awakening" d="M578 96 C606 75 628 116 659 86 S707 67 736 98 S774 119 803 75" />
-      <path className="csl-hero-line csl-hero-line-volatile" d="M803 75 C825 127 850 55 877 108 S929 48 953 112 S1000 42 1060 80" />
-      <circle className="csl-hero-pulse csl-hero-pulse-building" cx="500" cy="96" r="4" />
-      <circle className="csl-hero-pulse csl-hero-pulse-awakening" cx="736" cy="98" r="4" />
-      <circle className="csl-hero-pulse csl-hero-pulse-volatile" cx="953" cy="112" r="4" />
-    </svg>
-  );
+  return <svg className="h-[86px] w-full" viewBox="0 0 760 100" role="img" aria-label="Market signal progression from calm to volatile">
+    <path d="M8 52 C55 43 88 39 126 48 S194 64 235 51 S282 33 315 52 S350 70 385 42 S430 64 465 43 S510 65 545 46 S590 64 625 43 S685 59 752 45" fill="none" stroke="#cbd5e1" strokeWidth="2"/>
+    <path d="M8 52 C55 43 88 39 126 48" fill="none" stroke="var(--regime-calm)" strokeWidth="2.4"/>
+    <path d="M126 48 C194 64 235 51 282 33" fill="none" stroke="var(--regime-building)" strokeWidth="2.4"/>
+    <path d="M282 33 C315 52 350 70 385 42 S430 64 465 43" fill="none" stroke="var(--regime-awakening)" strokeWidth="2.4"/>
+    <path d="M465 43 C510 65 545 46 590 64 S625 43 685 59 S720 48 752 45" fill="none" stroke="var(--regime-volatile)" strokeWidth="2.4"/>
+    <circle cx="752" cy="45" r="4" fill="var(--regime-volatile)"/>
+  </svg>;
 }
 
 export default function Hero({ coins }: { coins: Coin[] }) {
   const counts: Record<SignalTier, number> = { calm: 0, building: 0, awakening: 0, volatile: 0 };
   for (const coin of coins) counts[getSignalTier(coin)]++;
-  const dominant = REGIMES.reduce((current, tier) => (counts[tier] > counts[current] ? tier : current));
-  const marketLabel = TIER_CONFIG[dominant].label;
-
-  return (
-    <section className="csl-hero" aria-labelledby="hero-title" style={{ paddingTop: "2.4rem", paddingBottom: "1.7rem" }}>
-      <div className="csl-hero-atmosphere" aria-hidden="true" />
-      <div className="csl-hero-content" style={{ maxWidth: "64rem" }}>
-        <p className="csl-hero-kicker" style={{ marginBottom: ".7rem", fontSize: ".6rem" }}>Crypto market intelligence</p>
-        <h1 id="hero-title" className="csl-hero-title" style={{ fontSize: "clamp(2.6rem, 6.2vw, 5.45rem)", lineHeight: ".95" }}>
-          <span>Track the calm.</span>
-          <span className="csl-gradient-text">Catch the move.</span>
-        </h1>
-        <p className="csl-hero-copy" style={{ marginTop: "1rem", maxWidth: "35rem", fontSize: "clamp(.88rem, 1.1vw, 1rem)", lineHeight: 1.5 }}>
-          See when crypto markets are calm, building momentum, awakening or turning volatile — before the move becomes obvious.
-        </p>
-        <figure className="csl-hero-signal" style={{ marginTop: "1.55rem", maxWidth: "54rem", paddingTop: ".75rem", paddingBottom: ".55rem", borderRadius: "1.15rem" }}>
-          <div className="csl-hero-signal-heading">
-            <figcaption>Market signal</figcaption>
-            <span>From stillness to movement</span>
-          </div>
-          <SignalPath />
-          <div className="csl-hero-regimes" aria-label="Market regime progression">
-            {REGIMES.map((regime) => (
-              <span key={regime} className="csl-hero-regime" data-regime={regime}><i aria-hidden="true" />{TIER_CONFIG[regime].label}</span>
-            ))}
-          </div>
-          <div className="mt-1 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">Market now · <span style={{ color: `var(--regime-${dominant})` }}>{marketLabel}</span></div>
-        </figure>
+  const dominant = REGIMES.reduce((a,b)=>counts[b]>counts[a]?b:a);
+  return <section className="mx-auto max-w-[1390px] px-3 pt-5 sm:px-5 sm:pt-6">
+    <div className="grid overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/90 shadow-[0_8px_30px_rgba(20,35,75,.04)] lg:grid-cols-[.9fr_1.25fr]">
+      <div className="border-b border-slate-100 px-5 py-5 lg:border-b-0 lg:border-r lg:px-6 lg:py-6">
+        <p className="text-[9px] font-bold uppercase tracking-[.14em] text-slate-500">Crypto market intelligence</p>
+        <h1 className="mt-3 text-[clamp(1.75rem,3.1vw,2.7rem)] font-semibold leading-[1.02] tracking-[-.055em] text-slate-950">Track the calm. <span className="csl-gradient-text">Catch the move.</span></h1>
+        <p className="mt-3 max-w-xl text-[11px] leading-5 text-slate-500 sm:text-xs">See when crypto markets are calm, building momentum, awakening or turning volatile — before the move becomes obvious.</p>
       </div>
-    </section>
-  );
+      <div className="px-5 py-4 lg:px-6 lg:py-5">
+        <div className="flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[.13em] text-slate-500">Market signal</p><p className="text-[8px] font-semibold uppercase tracking-[.11em] text-slate-400">From stillness to movement</p></div>
+        <SignalPath/>
+        <div className="grid grid-cols-4 gap-2">{REGIMES.map(r=><div key={r} className="flex items-center justify-center gap-1.5 text-[8px] font-bold uppercase tracking-[.06em] text-slate-600"><i className="h-2 w-2 rounded-full" style={{backgroundColor:`var(--regime-${r})`}}/>{TIER_CONFIG[r].label}</div>)}</div>
+        <p className="mt-2 text-center text-[8px] font-semibold uppercase tracking-[.1em] text-slate-400">Market now · <span style={{color:`var(--regime-${dominant})`}}>{TIER_CONFIG[dominant].label}</span></p>
+      </div>
+    </div>
+  </section>;
 }
