@@ -41,7 +41,7 @@ export function backtestSeries(prices: PricePoint[], minHistory = 120): Backtest
       confidencePct: fit.confidence * 100,
       streakDays: fit.streakDays,
       medianDaysToFlip: fit.medianDaysToFlip,
-      volatilityAcceleration: fit.volatilityAcceleration,
+      volatilityAccelerationPct: fit.volatilityAccelerationPct,
       volatilityPercentile: fit.volatilityPercentile,
       flipHazardPct: fit.flipHazardPct,
       recentStates: fit.hiddenStates.slice(-30),
