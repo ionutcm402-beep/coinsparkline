@@ -3,6 +3,7 @@ import "./globals.css";
 import FlowingLines from "@/components/FlowingLines";
 import { CurrencyProvider } from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
+import CoinPageWatchlistDock from "@/components/CoinPageWatchlistDock";
 
 export const metadata: Metadata = {
   title: "CoinSparkLine — Track the calm. Catch the move.",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <CurrencyProvider>
           <FlowingLines />
           {children}
+          <CoinPageWatchlistDock />
           <CookieConsent />
         </CurrencyProvider>
       </body>
