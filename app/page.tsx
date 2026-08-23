@@ -20,7 +20,7 @@ export default async function Home() {
   try { marketCoins = await fetchTopCoins(200, process.env.COINGECKO_API_KEY); } catch { marketCoins = []; }
   const relative = snapshot ? formatRelativeTime(snapshot.scannedAt) : undefined;
   const statusLabel = relative ? `${freshness.label} · ${relative}` : freshness.label;
-  return <div className="flex-1">
+  return <div className="flex-1 home-page-scale">
     <Header/>
     <Hero coins={coins}/>
     <div className="home-dashboard-scale">
@@ -33,6 +33,11 @@ export default async function Home() {
       .home-client-wrap > main > section:nth-of-type(3),
       .home-client-wrap > main > div:last-child > aside > section:last-child{display:none}
       @media (min-width: 900px){
+        .home-page-scale{
+          width:92.6%;
+          margin-inline:auto;
+          zoom:1.08;
+        }
         .home-dashboard-scale{
           width:88.2%;
           margin-inline:auto;
@@ -40,6 +45,10 @@ export default async function Home() {
         }
       }
       @media (min-width: 1500px){
+        .home-page-scale{
+          width:91.3%;
+          zoom:1.095;
+        }
         .home-dashboard-scale{
           width:86.6%;
           zoom:1.155;
