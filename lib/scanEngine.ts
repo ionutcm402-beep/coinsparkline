@@ -3,11 +3,18 @@ import { fitRegime } from "./regimeModel";
 import { coinCategory } from "./categories";
 import { Coin } from "@/types/coin";
 
-export async function runScan(n: number, days: number, apiKey?: string): Promise<Coin[]> {
+export async function runScan(
+  n: number,
+  days: number,
+  apiKey?: string,
+  offset = 0,
+  limit = n
+): Promise<Coin[]> {
   const coinMetaList = await fetchTopCoins(n, apiKey);
+  const batch = coinMetaList.slice(offset, Math.min(offset + limit, coinMetaList.length));
   const results: Coin[] = [];
 
-  for (const meta of coinMetaList) {
+  for (const meta of batch) {
     try {
       const history = await fetchPriceHistory(meta.id, days, apiKey);
       const fit = fitRegime(history.map((h) => ({ date: h.date, close: h.close })));
@@ -26,6 +33,7 @@ export async function runScan(n: number, days: number, apiKey?: string): Promise
         medianDaysToFlip: Math.round(fit.medianDaysToFlip * 10) / 10,
         logoUrl: meta.image,
         marketCap: meta.market_cap,
+        marketCapRank: meta.market_cap_rank,
         recentStates: fit.hiddenStates.slice(-30),
       });
     } catch {
@@ -34,9 +42,6 @@ export async function runScan(n: number, days: number, apiKey?: string): Promise
     }
   }
 
-  // Sort by theoretical days-to-flip ascending, same as the Python version:
-  // whichever coin is closest to changing regime (calm or volatile) surfaces first.
-  results.sort((a, b) => a.medianDaysToFlip - b.medianDaysToFlip);
-
+  results.sort((a, b) => (a.marketCapRank ?? 999999) - (b.marketCapRank ?? 999999));
   return results;
 }
