@@ -29,18 +29,20 @@ export default async function Home() {
       <div className="home-client-wrap"><HomeClient coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt} marketCoins={marketCoins} categories={categories} updatedLabel={statusLabel}/></div>
     </div>
     <style>{`
-      .home-client-wrap > main > section:nth-of-type(3){display:none}
+      .home-client-wrap > main > section:nth-of-type(1),
+      .home-client-wrap > main > section:nth-of-type(3),
+      .home-client-wrap > main > div:last-child > aside > section:last-child{display:none}
       @media (min-width: 900px){
         .home-dashboard-scale{
-          width:92.6%;
+          width:88.2%;
           margin-inline:auto;
-          zoom:1.08;
+          zoom:1.134;
         }
       }
       @media (min-width: 1500px){
         .home-dashboard-scale{
-          width:90.9%;
-          zoom:1.10;
+          width:86.6%;
+          zoom:1.155;
         }
       }
     `}</style>
