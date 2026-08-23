@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import FlowingLines from "@/components/FlowingLines";
+import { CurrencyProvider } from "@/components/CurrencyProvider";
 
 export const metadata: Metadata = {
   title: "CoinSparkLine — Track the calm. Catch the move.",
@@ -11,8 +12,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full">
       <body className="csl-app min-h-full flex flex-col antialiased">
-        <FlowingLines />
-        {children}
+        <CurrencyProvider>
+          <FlowingLines />
+          {children}
+        </CurrencyProvider>
       </body>
     </html>
   );
