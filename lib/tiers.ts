@@ -1,11 +1,5 @@
 import { Coin } from "@/types/coin";
 
-// Four-tier signal system, derived entirely from the real 2-state HMM's
-// confidence score -- not a separate model. High-confidence calm/volatile
-// keep their plain names; lower-confidence (closer to the 50/50 boundary,
-// meaning the model is less sure) get the "Building"/"Awakening" label to
-// convey "leaning this way, but less certain" -- an honest reframing of
-// real continuous data into a more expressive 4-tier UI.
 export type SignalTier = "calm" | "building" | "awakening" | "volatile";
 
 export const TIER_CONFIG: Record<SignalTier, { label: string; bg: string; text: string; dot: string }> = {
@@ -15,10 +9,46 @@ export const TIER_CONFIG: Record<SignalTier, { label: string; bg: string; text: 
   volatile: { label: "Volatile", bg: "bg-red-50", text: "text-red-700", dot: "#d6336c" },
 };
 
-const CONFIDENCE_THRESHOLD = 80; // above this = "confident", below = "building/awakening"
-
+/**
+ * Phase 2 four-stage classifier.
+ *
+ * The HMM remains the structural anchor (calm vs volatile), but the middle
+ * stages now require measured transition behaviour instead of merely a lower
+ * confidence score.
+ *
+ * CALM: low-volatility HMM state without strong transition evidence.
+ * BUILDING: still in the calm HMM state, but realised volatility is rising,
+ *           unusually high for the asset, the fitted flip hazard is elevated,
+ *           or the HMM itself is becoming uncertain.
+ * AWAKENING: the HMM has moved into the volatile state, but the transition is
+ *            fresh or not yet strongly confirmed.
+ * VOLATILE: established volatile-state behaviour with stronger confirmation.
+ */
 export function getSignalTier(coin: Coin): SignalTier {
-  const confident = coin.confidencePct >= CONFIDENCE_THRESHOLD;
-  if (coin.regimeState === "calm") return confident ? "calm" : "building";
-  return confident ? "volatile" : "awakening";
+  const accel = coin.volatilityAccelerationPct;
+  const percentile = coin.volatilityPercentile;
+  const hazard = coin.flipHazardPct;
+  const hasPhase2 = accel !== undefined && percentile !== undefined && hazard !== undefined;
+
+  // Backward compatibility for old saved snapshots until the first Phase 2
+  // refresh replaces them.
+  if (!hasPhase2) {
+    const confident = coin.confidencePct >= 80;
+    if (coin.regimeState === "calm") return confident ? "calm" : "building";
+    return confident ? "volatile" : "awakening";
+  }
+
+  if (coin.regimeState === "calm") {
+    const transitionEvidence =
+      accel! >= 15 ||
+      percentile! >= 68 ||
+      hazard! >= 18 ||
+      coin.confidencePct < 76;
+    return transitionEvidence ? "building" : "calm";
+  }
+
+  const newlyVolatile = coin.streakDays <= 3;
+  const stillForming = coin.confidencePct < 82;
+  const volatilityNotYetEstablished = percentile! < 72 && accel! < 20;
+  return newlyVolatile || stillForming || volatilityNotYetEstablished ? "awakening" : "volatile";
 }
