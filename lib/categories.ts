@@ -5,7 +5,7 @@ export const CATEGORY_COINS: Record<string, Set<string>> = {
   Stablecoins: new Set([
     "tether", "usd-coin", "usds", "dai", "binance-usd", "true-usd", "frax",
     "usdd", "gemini-dollar", "paypal-usd", "first-digital-usd", "usde",
-    "ethena-usde", "usdb", "fdusd", "pyusd", "tusd", "usdp", "susds",
+    "ethena-usde", "usdb", "fdusd", "pyusd", "tusd", "usdp", "susds", "usd1",
   ]),
   "Meme coins": new Set([
     "dogecoin", "shiba-inu", "pepe", "floki", "bonk", "dogwifcoin",

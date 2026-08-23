@@ -35,7 +35,8 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   const [sort, setSort] = useState<SortOption>("closest-to-flip");
 
   const filteredCoins = useMemo(() => {
-    const base = activeCategory === "All coins" ? coins : coins.filter((c) => c.category === activeCategory);
+    const eligibleCoins = coins.filter((coin) => !isStablecoin(coin.id));
+    const base = activeCategory === "All coins" ? eligibleCoins : eligibleCoins.filter((c) => c.category === activeCategory);
     return sortCoins(base, sort);
   }, [coins, activeCategory, sort]);
 
@@ -74,7 +75,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
 
       {watching.length > 0 && (
         <section className="csl-signal-section csl-signal-section-early">
-          <div className="csl-signal-section-heading"><div><p className="csl-kicker">Transition watch</p><h2>Early signals</h2><p>Building assets with the lowest confidence — statistically closest to a regime transition.</p></div></div>
+          <div className="csl-signal-section-heading"><div><p className="csl-kicker">Transition watch</p><h2>Early signals</h2><p>Assets showing the earliest signs of a regime shift.</p></div></div>
           <div className="csl-signal-grid">
             {watching.map((coin) => (
               <CoinCard key={coin.id} coin={coin} />

@@ -50,4 +50,4 @@ export const mockCoins: Coin[] = [
   },
 ];
 
-export const categories = ["All coins", "Layer 1", "DeFi", "Meme", "Stablecoins"];
+export const categories = ["All coins", "Layer 1", "DeFi", "Meme"];
