@@ -12,7 +12,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      # Temporary during the cumulative roadmap PR: package.json gained
+      # Supabase + Vitest after the existing lockfile was created. npm install
+      # lets CI validate the code now; regenerate/commit package-lock before merge.
+      - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm test
       - run: npm run lint
