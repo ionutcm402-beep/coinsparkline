@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import RegimeChart from "@/components/RegimeChart";
+import CurrencyAmount from "@/components/CurrencyAmount";
 import { fetchPriceHistory, fetchCoinDetails } from "@/lib/coingecko";
 import { fitRegime } from "@/lib/regimeModel";
 import { coinCategory } from "@/lib/categories";
@@ -89,7 +90,7 @@ export default async function CoinDetailPage({ params }: { params: Promise<{ id:
                 )}
                 <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{symbol} · {category}</p>
                 <h1 className="mt-1 text-3xl font-semibold tracking-[-0.045em] text-slate-950 sm:text-4xl">{displayName}</h1>
-                <p className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-slate-950 sm:text-5xl">${fit.closes[fit.closes.length - 1].toLocaleString(undefined, { maximumFractionDigits: 4 })}</p>
+                <p className="mt-3 text-4xl font-semibold tracking-[-0.045em] text-slate-950 sm:text-5xl"><CurrencyAmount usd={fit.closes[fit.closes.length - 1]} /></p>
                 <div className={`mt-4 rounded-full ${moodBg} px-4 py-2 text-xs font-bold tracking-[0.08em] ${moodText}`}>{mood.toUpperCase()} · {fit.streakDays}D STREAK</div>
               </div>
 
@@ -117,12 +118,10 @@ export default async function CoinDetailPage({ params }: { params: Promise<{ id:
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {[
-                  ["Market cap", formatCompactNumber(marketCap, "$")],
-                  ["Circulating supply", formatCompactNumber(circSupply)],
-                  ["All-time high", ath ? `$${ath.toLocaleString(undefined, { maximumFractionDigits: 4 })}` : "—"],
-                  ["Max supply", maxSupply ? formatCompactNumber(maxSupply) : "No cap"],
-                ].map(([label, value]) => <div key={label} className="rounded-2xl bg-slate-50/80 px-4 py-4"><p className="text-xs text-slate-400">{label}</p><p className="mt-1 font-medium text-slate-700">{value}</p></div>)}
+                <div className="rounded-2xl bg-slate-50/80 px-4 py-4"><p className="text-xs text-slate-400">Market cap</p><p className="mt-1 font-medium text-slate-700"><CurrencyAmount usd={marketCap} compact /></p></div>
+                <div className="rounded-2xl bg-slate-50/80 px-4 py-4"><p className="text-xs text-slate-400">Circulating supply</p><p className="mt-1 font-medium text-slate-700">{formatCompactNumber(circSupply)}</p></div>
+                <div className="rounded-2xl bg-slate-50/80 px-4 py-4"><p className="text-xs text-slate-400">All-time high</p><p className="mt-1 font-medium text-slate-700"><CurrencyAmount usd={ath} /></p></div>
+                <div className="rounded-2xl bg-slate-50/80 px-4 py-4"><p className="text-xs text-slate-400">Max supply</p><p className="mt-1 font-medium text-slate-700">{maxSupply ? formatCompactNumber(maxSupply) : "No cap"}</p></div>
               </div>
 
               {fit.transitions.length > 0 && (
