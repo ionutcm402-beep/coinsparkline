@@ -33,3 +33,10 @@ export function coinCategory(coinId: string): string {
   }
   return "Other";
 }
+
+// Discovery signals focus on assets capable of meaningful price movement.
+// This uses the central category mapping, so it applies to every discovery
+// ranking rather than hiding only the current UI results.
+export function isStablecoin(coinId: string): boolean {
+  return CATEGORY_COINS.Stablecoins.has(coinId);
+}

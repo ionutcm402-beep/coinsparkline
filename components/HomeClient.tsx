@@ -7,6 +7,7 @@ import MarketRegimeSummary from "@/components/MarketRegimeSummary";
 import SortControl, { SortOption } from "@/components/SortControl";
 import { Coin } from "@/types/coin";
 import { getSignalTier } from "@/lib/tiers";
+import { isStablecoin } from "@/lib/categories";
 
 interface HomeClientProps {
   coins: Coin[];
@@ -41,7 +42,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   // Top signals: highest-confidence awakening/volatile coins -- the ones
   // actually showing meaningful movement right now.
   const topSignals = useMemo(() => {
-    return [...coins]
+    return coins.filter((coin) => !isStablecoin(coin.id))
       .filter((c) => getSignalTier(c) === "volatile" || getSignalTier(c) === "awakening")
       .sort((a, b) => b.confidencePct - a.confidencePct)
       .slice(0, 4);
@@ -50,7 +51,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   // Watching: calm coins with the LOWEST confidence -- genuinely closest to
   // a real regime flip, based on the same real confidence score.
   const watching = useMemo(() => {
-    return [...coins]
+    return coins.filter((coin) => !isStablecoin(coin.id))
       .filter((c) => getSignalTier(c) === "building")
       .sort((a, b) => a.confidencePct - b.confidencePct)
       .slice(0, 4);
