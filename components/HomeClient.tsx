@@ -40,8 +40,6 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
     return sortCoins(base, sort);
   }, [coins, activeCategory, sort]);
 
-  // Top signals: highest-confidence awakening/volatile coins -- the ones
-  // actually showing meaningful movement right now.
   const topSignals = useMemo(() => {
     return coins.filter((coin) => !isStablecoin(coin.id, coin.symbol))
       .filter((c) => getSignalTier(c) === "volatile" || getSignalTier(c) === "awakening")
@@ -49,8 +47,6 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
       .slice(0, 4);
   }, [coins]);
 
-  // Watching: calm coins with the LOWEST confidence -- genuinely closest to
-  // a real regime flip, based on the same real confidence score.
   const watching = useMemo(() => {
     return coins.filter((coin) => !isStablecoin(coin.id, coin.symbol))
       .filter((c) => getSignalTier(c) === "building")
@@ -59,45 +55,57 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   }, [coins]);
 
   return (
-    <div className="mx-auto max-w-[1240px] space-y-6 px-6">
+    <div className="mx-auto max-w-[1240px] space-y-10 px-5 sm:px-6">
       <MarketRegimeSummary coins={coins} updatedLabel={updatedLabel} />
 
       {topSignals.length > 0 && (
         <section className="csl-signal-section csl-signal-section-top">
-          <div className="csl-signal-section-heading"><div><p className="csl-kicker">Signal intelligence</p><h2>Top signals</h2><p>Strongest regime signals across the market.</p></div></div>
-          <div className="csl-signal-grid">
-            {topSignals.map((coin) => (
-              <CoinCard key={coin.id} coin={coin} />
-            ))}
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="csl-kicker">Signal intelligence</p>
+            <h2 className="mt-1">Top signals</h2>
+            <p className="mt-2 text-sm text-slate-500">Strongest regime signals across the market.</p>
+          </div>
+          <div className="csl-signal-grid mt-7">
+            {topSignals.map((coin) => <CoinCard key={coin.id} coin={coin} />)}
           </div>
         </section>
       )}
 
       {watching.length > 0 && (
         <section className="csl-signal-section csl-signal-section-early">
-          <div className="csl-signal-section-heading"><div><p className="csl-kicker">Transition watch</p><h2>Early signals</h2><p>Assets showing the earliest signs of a regime shift.</p></div></div>
-          <div className="csl-transition-radar">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="csl-kicker">Transition watch</p>
+            <h2 className="mt-1">Early signals</h2>
+            <p className="mt-2 text-sm text-slate-500">Assets showing the earliest signs of a regime shift.</p>
+          </div>
+          <div className="csl-transition-radar mt-7">
             {watching.map((coin, index) => (
-              <div key={coin.id} className="csl-radar-candidate"><span className="csl-radar-rank">0{index + 1}</span><CoinCard coin={coin} /></div>
+              <div key={coin.id} className="csl-radar-candidate">
+                <span className="csl-radar-rank">0{index + 1}</span>
+                <CoinCard coin={coin} />
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      <section className="csl-market-browser">
-        <div className="csl-signal-section-heading"><div><p className="csl-kicker">Market discovery</p><h2>Explore the market</h2><p>Scan the market and discover where momentum is forming.</p></div></div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+      <section className="csl-market-browser pb-10">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="csl-kicker">Market discovery</p>
+          <h2 className="mt-1">Explore the market</h2>
+          <p className="mt-2 text-sm text-slate-500">Scan the market and discover where momentum is forming.</p>
+        </div>
+
+        <div className="mx-auto mt-7 flex max-w-5xl flex-col gap-3 rounded-2xl border border-slate-200/70 bg-white/70 p-3 shadow-[0_10px_30px_rgba(20,35,75,0.04)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <FilterPills categories={categories} active={activeCategory} onChange={setActiveCategory} />
-          <SortControl value={sort} onChange={setSort} />
+          <div className="self-end sm:self-auto"><SortControl value={sort} onChange={setSort} /></div>
         </div>
 
         {filteredCoins.length === 0 ? (
-          <p className="py-12 text-center text-sm text-gray-400">No coins in this category yet.</p>
+          <p className="py-12 text-center text-sm text-slate-400">No coins in this category yet.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {filteredCoins.map((coin) => (
-              <CoinCard key={coin.id} coin={coin} />
-            ))}
+          <div className="mx-auto mt-5 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCoins.map((coin) => <CoinCard key={coin.id} coin={coin} />)}
           </div>
         )}
       </section>
