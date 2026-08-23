@@ -35,7 +35,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   const [sort, setSort] = useState<SortOption>("closest-to-flip");
 
   const filteredCoins = useMemo(() => {
-    const eligibleCoins = coins.filter((coin) => !isStablecoin(coin.id));
+    const eligibleCoins = coins.filter((coin) => !isStablecoin(coin.id, coin.symbol));
     const base = activeCategory === "All coins" ? eligibleCoins : eligibleCoins.filter((c) => c.category === activeCategory);
     return sortCoins(base, sort);
   }, [coins, activeCategory, sort]);
@@ -43,7 +43,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   // Top signals: highest-confidence awakening/volatile coins -- the ones
   // actually showing meaningful movement right now.
   const topSignals = useMemo(() => {
-    return coins.filter((coin) => !isStablecoin(coin.id))
+    return coins.filter((coin) => !isStablecoin(coin.id, coin.symbol))
       .filter((c) => getSignalTier(c) === "volatile" || getSignalTier(c) === "awakening")
       .sort((a, b) => b.confidencePct - a.confidencePct)
       .slice(0, 4);
@@ -52,7 +52,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
   // Watching: calm coins with the LOWEST confidence -- genuinely closest to
   // a real regime flip, based on the same real confidence score.
   const watching = useMemo(() => {
-    return coins.filter((coin) => !isStablecoin(coin.id))
+    return coins.filter((coin) => !isStablecoin(coin.id, coin.symbol))
       .filter((c) => getSignalTier(c) === "building")
       .sort((a, b) => a.confidencePct - b.confidencePct)
       .slice(0, 3);
@@ -76,15 +76,16 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
       {watching.length > 0 && (
         <section className="csl-signal-section csl-signal-section-early">
           <div className="csl-signal-section-heading"><div><p className="csl-kicker">Transition watch</p><h2>Early signals</h2><p>Assets showing the earliest signs of a regime shift.</p></div></div>
-          <div className="csl-signal-grid">
-            {watching.map((coin) => (
-              <CoinCard key={coin.id} coin={coin} />
+          <div className="csl-transition-radar">
+            {watching.map((coin, index) => (
+              <div key={coin.id} className="csl-radar-candidate"><span className="csl-radar-rank">0{index + 1}</span><CoinCard coin={coin} /></div>
             ))}
           </div>
         </section>
       )}
 
-      <section>
+      <section className="csl-market-browser">
+        <div className="csl-signal-section-heading"><div><p className="csl-kicker">Market discovery</p><h2>Explore the market</h2><p>Scan the market and discover where momentum is forming.</p></div></div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <FilterPills categories={categories} active={activeCategory} onChange={setActiveCategory} />
           <SortControl value={sort} onChange={setSort} />

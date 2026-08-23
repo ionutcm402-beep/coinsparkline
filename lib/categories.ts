@@ -37,6 +37,9 @@ export function coinCategory(coinId: string): string {
 // Discovery signals focus on assets capable of meaningful price movement.
 // This uses the central category mapping, so it applies to every discovery
 // ranking rather than hiding only the current UI results.
-export function isStablecoin(coinId: string): boolean {
-  return CATEGORY_COINS.Stablecoins.has(coinId);
+export function isStablecoin(coinId: string, symbol?: string): boolean {
+  const normalizedId = coinId.toLowerCase();
+  const normalizedSymbol = symbol?.toUpperCase();
+  const knownStableSymbols = new Set(["USDT", "USDC", "USDS", "DAI", "FDUSD", "USDE", "USD1", "PYUSD", "TUSD", "USDP", "BUSD"]);
+  return CATEGORY_COINS.Stablecoins.has(normalizedId) || Boolean(normalizedSymbol && knownStableSymbols.has(normalizedSymbol));
 }
