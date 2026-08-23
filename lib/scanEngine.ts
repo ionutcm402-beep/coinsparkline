@@ -24,19 +24,18 @@ export async function runScan(n: number, days: number, apiKey?: string): Promise
         confidencePct: Math.round(fit.confidence * 1000) / 10,
         streakDays: fit.streakDays,
         medianDaysToFlip: Math.round(fit.medianDaysToFlip * 10) / 10,
+        volatilityAccelerationPct: Math.round(fit.volatilityAccelerationPct * 10) / 10,
+        volatilityPercentile: Math.round(fit.volatilityPercentile * 10) / 10,
+        flipHazardPct: Math.round(fit.flipHazardPct * 10) / 10,
         logoUrl: meta.image,
         marketCap: meta.market_cap,
         recentStates: fit.hiddenStates.slice(-30),
       });
     } catch {
-      // Skip coins that fail to fetch/fit -- one bad coin shouldn't kill the whole scan.
       continue;
     }
   }
 
-  // Sort by theoretical days-to-flip ascending, same as the Python version:
-  // whichever coin is closest to changing regime (calm or volatile) surfaces first.
   results.sort((a, b) => a.medianDaysToFlip - b.medianDaysToFlip);
-
   return results;
 }
