@@ -23,10 +23,27 @@ export default async function Home() {
   return <div className="flex-1">
     <Header/>
     <Hero coins={coins}/>
-    <DataFreshnessStrip freshness={freshness}/>
-    <ChangeSummary coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt}/>
-    <div className="home-client-wrap"><HomeClient coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt} marketCoins={marketCoins} categories={categories} updatedLabel={statusLabel}/></div>
-    <style>{`.home-client-wrap > main > section:nth-of-type(3){display:none}`}</style>
+    <div className="home-dashboard-scale">
+      <DataFreshnessStrip freshness={freshness}/>
+      <ChangeSummary coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt}/>
+      <div className="home-client-wrap"><HomeClient coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt} marketCoins={marketCoins} categories={categories} updatedLabel={statusLabel}/></div>
+    </div>
+    <style>{`
+      .home-client-wrap > main > section:nth-of-type(3){display:none}
+      @media (min-width: 900px){
+        .home-dashboard-scale{
+          width:92.6%;
+          margin-inline:auto;
+          zoom:1.08;
+        }
+      }
+      @media (min-width: 1500px){
+        .home-dashboard-scale{
+          width:90.9%;
+          zoom:1.10;
+        }
+      }
+    `}</style>
     <Footer/>
   </div>;
 }
