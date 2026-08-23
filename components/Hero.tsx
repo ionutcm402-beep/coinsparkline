@@ -39,18 +39,18 @@ export default function Hero({ coins }: { coins: Coin[] }) {
   const marketLabel = TIER_CONFIG[dominant].label;
 
   return (
-    <section className="csl-hero" aria-labelledby="hero-title">
+    <section className="csl-hero" aria-labelledby="hero-title" style={{ paddingTop: "2.4rem", paddingBottom: "1.7rem" }}>
       <div className="csl-hero-atmosphere" aria-hidden="true" />
-      <div className="csl-hero-content">
-        <p className="csl-hero-kicker">Crypto market intelligence</p>
-        <h1 id="hero-title" className="csl-hero-title">
+      <div className="csl-hero-content" style={{ maxWidth: "64rem" }}>
+        <p className="csl-hero-kicker" style={{ marginBottom: ".7rem", fontSize: ".6rem" }}>Crypto market intelligence</p>
+        <h1 id="hero-title" className="csl-hero-title" style={{ fontSize: "clamp(2.6rem, 6.2vw, 5.45rem)", lineHeight: ".95" }}>
           <span>Track the calm.</span>
           <span className="csl-gradient-text">Catch the move.</span>
         </h1>
-        <p className="csl-hero-copy">
+        <p className="csl-hero-copy" style={{ marginTop: "1rem", maxWidth: "35rem", fontSize: "clamp(.88rem, 1.1vw, 1rem)", lineHeight: 1.5 }}>
           See when crypto markets are calm, building momentum, awakening or turning volatile — before the move becomes obvious.
         </p>
-        <figure className="csl-hero-signal">
+        <figure className="csl-hero-signal" style={{ marginTop: "1.55rem", maxWidth: "54rem", paddingTop: ".75rem", paddingBottom: ".55rem", borderRadius: "1.15rem" }}>
           <div className="csl-hero-signal-heading">
             <figcaption>Market signal</figcaption>
             <span>From stillness to movement</span>
@@ -61,6 +61,7 @@ export default function Hero({ coins }: { coins: Coin[] }) {
               <span key={regime} className="csl-hero-regime" data-regime={regime}><i aria-hidden="true" />{TIER_CONFIG[regime].label}</span>
             ))}
           </div>
+          <div className="mt-1 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">Market now · <span style={{ color: `var(--regime-${dominant})` }}>{marketLabel}</span></div>
         </figure>
       </div>
     </section>
