@@ -3,25 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-function LogoMark({ width = 58 }: { width?: number }) {
+function LogoMark() {
   return (
-    <span className="csl-logo-mark" aria-hidden="true">
-      <svg width={width} viewBox="0 0 112 48" className="block shrink-0" fill="none">
+    <span
+      className="csl-logo-mark"
+      aria-hidden="true"
+      style={{ width: "3.35rem", height: "1.8rem", flex: "0 0 auto" }}
+    >
+      <svg viewBox="0 0 94 38" width="54" height="28" fill="none" className="block">
         <defs>
-          <linearGradient id="csl-signal" x1="4" y1="24" x2="108" y2="24" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="var(--brand-blue)" />
-            <stop offset="0.52" stopColor="var(--brand-violet)" />
-            <stop offset="1" stopColor="var(--brand-magenta)" />
+          <linearGradient id="csl-final-signal" x1="3" y1="19" x2="91" y2="19" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#2F80F7" />
+            <stop offset="0.5" stopColor="#7957E8" />
+            <stop offset="1" stopColor="#E33B96" />
           </linearGradient>
-          <radialGradient id="csl-dot" cx="0" cy="0" r="1" gradientTransform="translate(106 24) rotate(90) scale(8)">
-            <stop stopColor="#ffffff" />
-            <stop offset="0.25" stopColor="var(--brand-magenta)" />
-            <stop offset="1" stopColor="var(--brand-magenta)" stopOpacity="0" />
-          </radialGradient>
         </defs>
-        <path d="M4 24H43L53 5L64 43L74 24H106" stroke="url(#csl-signal)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="106" cy="24" r="7" fill="url(#csl-dot)" opacity="0.55" />
-        <circle cx="106" cy="24" r="2.6" fill="var(--brand-magenta)" />
+        <path
+          d="M4 21H30C34 21 36 20 38 16L45 4L53 34L61 19C62.5 16.5 64.5 15 68 15H78"
+          stroke="url(#csl-final-signal)"
+          strokeWidth="4.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="84" cy="15" r="4.3" fill="#D84AA0" />
       </svg>
     </span>
   );
@@ -29,8 +33,31 @@ function LogoMark({ width = 58 }: { width?: number }) {
 
 function Wordmark() {
   return (
-    <span className="csl-wordmark" aria-hidden="true">
-      <strong>Coin</strong><span>SparkLine</span>
+    <span
+      className="csl-wordmark"
+      aria-hidden="true"
+      style={{
+        display: "inline-flex",
+        alignItems: "baseline",
+        gap: "0",
+        fontSize: "1.08rem",
+        letterSpacing: "-0.045em",
+        lineHeight: 1,
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span style={{ color: "#0B1224", fontWeight: 760 }}>Coin</span>
+      <span
+        style={{
+          fontWeight: 560,
+          background: "linear-gradient(105deg, #2F80F7 0%, #7957E8 50%, #E33B96 100%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+        }}
+      >
+        SparkLine
+      </span>
     </span>
   );
 }
@@ -46,15 +73,28 @@ export default function Header() {
   return (
     <header className="csl-site-header">
       <div className="csl-header-inner">
-        <Link href="/" className="csl-brand" aria-label="CoinSparkLine home">
+        <Link
+          href="/"
+          className="csl-brand"
+          aria-label="CoinSparkLine home"
+          style={{ gap: "0.4rem" }}
+        >
           <LogoMark />
-          <span className="hidden min-[420px]:inline"><Wordmark /></span>
+          <span className="hidden min-[420px]:inline">
+            <Wordmark />
+          </span>
         </Link>
+
         <nav className="csl-primary-nav" aria-label="Primary navigation">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link key={item.href} href={item.href} className={`csl-nav-link${isActive ? " csl-nav-link--active" : ""}`} aria-current={isActive ? "page" : undefined}>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`csl-nav-link${isActive ? " csl-nav-link--active" : ""}`}
+                aria-current={isActive ? "page" : undefined}
+              >
                 {item.label}
               </Link>
             );
