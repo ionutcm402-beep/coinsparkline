@@ -1,40 +1,17 @@
-<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 48" fill="none">
   <defs>
-    <linearGradient id="csl-ring" x1="12" y1="4" x2="44" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2563eb"/>
-      <stop offset="0.55" stop-color="#5b5be0"/>
-      <stop offset="1" stop-color="#8b2fc9"/>
+    <linearGradient id="signal" x1="4" y1="24" x2="108" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset=".52" stop-color="#7957E8"/>
+      <stop offset="1" stop-color="#DC4F91"/>
     </linearGradient>
-    <linearGradient id="csl-spark" x1="10" y1="44" x2="46" y2="14" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2563eb"/>
-      <stop offset="0.6" stop-color="#c026d3"/>
-      <stop offset="1" stop-color="#ec4899"/>
-    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(106 24) rotate(90) scale(8)">
+      <stop stop-color="#fff"/>
+      <stop offset=".25" stop-color="#DC4F91"/>
+      <stop offset="1" stop-color="#DC4F91" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-
-  <!-- Open "C" ring -->
-  <path
-    d="M45 15.5
-       A22 22 0 1 0 45 48.5"
-    fill="none"
-    stroke="url(#csl-ring)"
-    stroke-width="8"
-    stroke-linecap="round"
-  />
-
-  <!-- Ascending sparkline zigzag inside the C -->
-  <path
-    d="M14 41 L22 33 L28 39 L40 20"
-    fill="none"
-    stroke="url(#csl-spark)"
-    stroke-width="3.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-
-  <!-- Star/sparkle accent at the peak -->
-  <path
-    d="M45 10 L46.4 14 L50.4 15.4 L46.4 16.8 L45 20.8 L43.6 16.8 L39.6 15.4 L43.6 14 Z"
-    fill="#ec4899"
-  />
+  <path d="M4 24H43L53 5L64 43L74 24H106" stroke="url(#signal)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="106" cy="24" r="7" fill="url(#glow)" opacity=".55"/>
+  <circle cx="106" cy="24" r="2.6" fill="#DC4F91"/>
 </svg>
