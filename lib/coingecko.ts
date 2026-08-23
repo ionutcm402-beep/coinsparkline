@@ -80,6 +80,7 @@ export interface CoinDetails {
   symbol: string;
   description: string;
   homepage: string | null;
+  imageUrl: string | null;
   currentPrice: number | null;
   marketCap: number | null;
   ath: number | null;
@@ -114,6 +115,7 @@ export async function fetchCoinDetails(coinId: string, apiKey?: string): Promise
       symbol: (data.symbol || coinId.slice(0, 5)).toUpperCase(),
       description,
       homepage,
+      imageUrl: data.image?.large || data.image?.small || data.image?.thumb || null,
       currentPrice: md.current_price?.usd ?? null,
       marketCap: md.market_cap?.usd ?? null,
       ath: md.ath?.usd ?? null,
