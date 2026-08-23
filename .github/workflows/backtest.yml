@@ -1,0 +1,35 @@
+name: Phase 3 Signal Backtest
+
+on:
+  workflow_dispatch:
+    inputs:
+      coins:
+        description: "Number of top coins to test (5-30)"
+        required: false
+        default: "20"
+      days:
+        description: "Historical days requested (365-3650)"
+        required: false
+        default: "1460"
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run historical validation
+        env:
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          BACKTEST_COINS: ${{ inputs.coins }}
+          BACKTEST_DAYS: ${{ inputs.days }}
+        run: npm run backtest | tee phase-3-backtest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase-3-backtest
+          path: phase-3-backtest.txt

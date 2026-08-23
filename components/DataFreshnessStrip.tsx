@@ -1,15 +1,2 @@
-import { DataFreshness, freshnessTone } from "@/lib/dataFreshness";
-
-export default function DataFreshnessStrip({ freshness }: { freshness: DataFreshness }) {
-  const tone = freshnessTone(freshness.state);
-  return <div className="mx-auto mt-2 max-w-[1390px] px-3 sm:px-5">
-    <div className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border ${tone.border} ${tone.bg} px-3 py-2`}>
-      <div className="flex items-center gap-2">
-        <span className={`h-2 w-2 rounded-full ${tone.dot}`} />
-        <strong className={`text-[10px] ${tone.text}`}>{freshness.label}</strong>
-        <span className="text-[9px] text-slate-500">{freshness.detail}</span>
-      </div>
-      <span className="text-[8px] font-semibold uppercase tracking-[.1em] text-slate-400">Signal model freshness</span>
-    </div>
-  </div>;
-}
+import Link from"next/link";import{DataFreshness,freshnessTone}from"@/lib/dataFreshness";
+export default function DataFreshnessStrip({freshness}:{freshness:DataFreshness}){const tone=freshnessTone(freshness.state);return <div className="mx-auto mt-2 max-w-[1390px] px-3 sm:px-5"><div className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border ${tone.border} ${tone.bg} px-3 py-2`}><div className="flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${tone.dot}`}/><strong className={`text-[10px] ${tone.text}`}>{freshness.label}</strong><span className="text-[9px] text-slate-500">{freshness.detail}</span></div><div className="flex items-center gap-2 text-[8px] font-semibold uppercase tracking-[.09em]"><span className="text-slate-400">Signal model freshness</span><Link href="/status" className="text-blue-600 hover:text-blue-700">Status</Link><span className="text-slate-300">·</span><Link href="/data-sources" className="text-blue-600 hover:text-blue-700">Sources</Link></div></div></div>}

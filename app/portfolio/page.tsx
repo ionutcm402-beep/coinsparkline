@@ -1,5 +1,3 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PortfolioClient from "@/components/PortfolioClient";
-
-export default function PortfolioPage(){return <div className="min-h-screen"><Header/><PortfolioClient/><Footer/></div>}
+import Header from"@/components/Header";import Footer from"@/components/Footer";import PortfolioClient from"@/components/PortfolioClient";import{getLatestScan}from"@/lib/blobStorage";import{fetchTopCoins}from"@/lib/coingecko";
+export const revalidate=300;
+export default async function PortfolioPage(){const[snapshot,market]=await Promise.all([getLatestScan(),fetchTopCoins(250,process.env.COINGECKO_API_KEY).catch(()=>[])]);return <div className="min-h-screen"><Header/><PortfolioClient trackedCoins={snapshot?.coins??[]} marketCoins={market.map(c=>({id:c.id,symbol:c.symbol.toUpperCase(),name:c.name,price:c.current_price,change24hPct:c.price_change_percentage_24h??0,image:c.image}))}/><Footer/></div>}

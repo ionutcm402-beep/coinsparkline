@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import HomeClient from "@/components/HomeClient";
+import Phase4Dashboard from "@/components/Phase4Dashboard";
 import Footer from "@/components/Footer";
 import DataFreshnessStrip from "@/components/DataFreshnessStrip";
 import { getLatestScan, getPreviousScan } from "@/lib/blobStorage";
@@ -19,5 +19,5 @@ export default async function Home() {
   try { marketCoins = await fetchTopCoins(200, process.env.COINGECKO_API_KEY); } catch { marketCoins = []; }
   const relative = snapshot ? formatRelativeTime(snapshot.scannedAt) : undefined;
   const statusLabel = relative ? `${freshness.label} · ${relative}` : freshness.label;
-  return <div className="flex-1"><Header/><Hero coins={coins}/><DataFreshnessStrip freshness={freshness}/><HomeClient coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt} marketCoins={marketCoins} categories={categories} updatedLabel={statusLabel}/><Footer/></div>;
+  return <div className="flex-1"><Header/><Hero coins={coins}/><DataFreshnessStrip freshness={freshness}/><Phase4Dashboard coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt} marketCoins={marketCoins} categories={categories} updatedLabel={statusLabel}/><Footer/></div>;
 }

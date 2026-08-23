@@ -14,7 +14,12 @@ export interface Coin {
   logoUrl?: string;
   marketCap?: number | null;
   marketCapRank?: number | null;
+  // Phase 2 transition diagnostics. Optional for backward compatibility with
+  // snapshots produced before the four-stage classifier was introduced.
+  volatilityAccelerationPct?: number;
+  volatilityPercentile?: number;
+  flipHazardPct?: number;
   // Last ~30 days of regime states (0=calm, 1=volatile), for the mini
-  // sparkline on each card. Represents the SIGNAL, not raw price, per design intent.
+  // sparkline on each card. Represents the SIGNAL, not raw price.
   recentStates?: number[];
 }
