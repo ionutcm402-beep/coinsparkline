@@ -68,8 +68,8 @@ export default function Phase4Dashboard({coins,previousCoins=[],previousScannedA
 
   const radar=useMemo(()=>{
     const fresh=(a:Coin,b:Coin)=>a.streakDays-b.streakDays||b.confidencePct-a.confidencePct;
-    if(radarMode==="heating")return eligible.filter(c=>["building","awakening","volatile"].includes(getSignalTier(c))).sort((a,b)=>(b.volatilityAcceleration??1)-(a.volatilityAcceleration??1)||fresh(a,b)).slice(0,5);
-    if(radarMode==="cooling")return eligible.filter(c=>["calm","building"].includes(getSignalTier(c))).sort((a,b)=>(a.volatilityAcceleration??1)-(b.volatilityAcceleration??1)||fresh(a,b)).slice(0,5);
+    if(radarMode==="heating")return eligible.filter(c=>["building","awakening","volatile"].includes(getSignalTier(c))).sort((a,b)=>(b.volatilityAccelerationPct??1)-(a.volatilityAccelerationPct??1)||fresh(a,b)).slice(0,5);
+    if(radarMode==="cooling")return eligible.filter(c=>["calm","building"].includes(getSignalTier(c))).sort((a,b)=>(a.volatilityAccelerationPct??1)-(b.volatilityAccelerationPct??1)||fresh(a,b)).slice(0,5);
     if(radarMode==="flipped")return eligible.filter(c=>c.streakDays<=2).sort(fresh).slice(0,5);
     return [...eligible].sort((a,b)=>getSparkScore(b).score-getSparkScore(a).score).slice(0,5);
   },[eligible,radarMode]);
