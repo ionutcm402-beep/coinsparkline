@@ -18,7 +18,7 @@ export default async function Home() {
   return (
     <div className="flex-1">
       <Header />
-      <Hero />
+      <Hero coins={coins} />
 
       <div className="mx-auto max-w-[1240px] px-6">
         {isLiveData ? (
