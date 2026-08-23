@@ -11,6 +11,7 @@ import { getSignalTier } from "@/lib/tiers";
 interface HomeClientProps {
   coins: Coin[];
   categories: string[];
+  updatedLabel?: string;
 }
 
 function sortCoins(coins: Coin[], sort: SortOption): Coin[] {
@@ -28,7 +29,7 @@ function sortCoins(coins: Coin[], sort: SortOption): Coin[] {
   }
 }
 
-export default function HomeClient({ coins, categories }: HomeClientProps) {
+export default function HomeClient({ coins, categories, updatedLabel }: HomeClientProps) {
   const [activeCategory, setActiveCategory] = useState("All coins");
   const [sort, setSort] = useState<SortOption>("closest-to-flip");
 
@@ -57,7 +58,7 @@ export default function HomeClient({ coins, categories }: HomeClientProps) {
 
   return (
     <div className="mx-auto max-w-[1240px] space-y-6 px-6">
-      <MarketRegimeSummary coins={coins} />
+      <MarketRegimeSummary coins={coins} updatedLabel={updatedLabel} />
 
       {topSignals.length > 0 && (
         <section>

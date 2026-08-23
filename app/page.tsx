@@ -20,20 +20,11 @@ export default async function Home() {
       <Header />
       <Hero coins={coins} />
 
-      <div className="mx-auto max-w-[1240px] px-6">
-        {isLiveData ? (
-          <p className="mb-4 flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
-            Updated {formatRelativeTime(snapshot!.scannedAt)}
-          </p>
-        ) : (
-          <p className="mb-4 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-700">
-            Showing placeholder data. Live data appears after the first daily scan runs.
-          </p>
-        )}
-      </div>
-
-      <HomeClient coins={coins} categories={categories} />
+      <HomeClient
+        coins={coins}
+        categories={categories}
+        updatedLabel={isLiveData ? formatRelativeTime(snapshot!.scannedAt) : undefined}
+      />
     </div>
   );
 }
