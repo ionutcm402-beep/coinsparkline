@@ -328,8 +328,9 @@ body {
 /* Centred signal narrative: one focal reading, then quiet supporting evidence. */
 .csl-signal-section { width:min(100%,68rem);margin-inline:auto;text-align:center; }.csl-signal-section-heading { justify-content:center; }.csl-signal-section-heading p:not(.csl-kicker) { margin-inline:auto; }.csl-signal-section-top .csl-signal-grid { width:min(100%,54rem);margin-inline:auto;grid-template-columns:repeat(3,minmax(0,1fr)); }.csl-signal-section-top .csl-signal-grid > :first-child { grid-column:1 / -1; width:min(100%,29rem);margin-inline:auto;min-height:21rem;text-align:left;box-shadow:0 20px 48px rgb(41 61 105 / 10%); }.csl-signal-section-top .csl-signal-grid > :first-child .csl-signal-trace { opacity:1; }.csl-signal-section-early { width:min(100%,58rem); }.csl-signal-section-early .csl-signal-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.csl-signal-section-early .group { text-align:left; }.csl-signal-section-early .group:nth-child(n+3) { opacity:.82; } @media (max-width:40rem){.csl-signal-section-top .csl-signal-grid,.csl-signal-section-early .csl-signal-grid{grid-template-columns:1fr}.csl-signal-section-top .csl-signal-grid > :first-child{grid-column:auto;width:100%}}
 
+.csl-signal-section-heading h2 { text-transform:uppercase;letter-spacing:.07em; }.csl-signal-section-early .csl-signal-grid { width:min(100%,48rem);margin-inline:auto;grid-template-columns:repeat(3,minmax(0,1fr)); }.csl-signal-section-early .group:nth-child(n+3) { opacity:1; }.csl-signal-trace { display:block;width:100%;height:1.75rem;opacity:.72; }.csl-signal-section .group { min-height:0; }.csl-signal-section-top .group { min-height:0; }.csl-signal-section-top .csl-signal-grid > :first-child { min-height:0; }.csl-signal-section .group .mb-2\.5 { margin-block:.8rem; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
-

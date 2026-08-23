@@ -55,7 +55,7 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
     return coins.filter((coin) => !isStablecoin(coin.id))
       .filter((c) => getSignalTier(c) === "building")
       .sort((a, b) => a.confidencePct - b.confidencePct)
-      .slice(0, 4);
+      .slice(0, 3);
   }, [coins]);
 
   return (
