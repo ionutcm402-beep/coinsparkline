@@ -61,9 +61,9 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
       <MarketRegimeSummary coins={coins} updatedLabel={updatedLabel} />
 
       {topSignals.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-gray-700">⚡ Top signals</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <section className="csl-signal-section csl-signal-section-top">
+          <div className="csl-signal-section-heading"><div><p className="csl-kicker">Signal intelligence</p><h2>Top signals</h2><p>Strongest regime signals across the market.</p></div></div>
+          <div className="csl-signal-grid">
             {topSignals.map((coin) => (
               <CoinCard key={coin.id} coin={coin} />
             ))}
@@ -72,12 +72,9 @@ export default function HomeClient({ coins, categories, updatedLabel }: HomeClie
       )}
 
       {watching.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-gray-700">👀 Watching</h2>
-          <p className="-mt-2 mb-3 text-xs text-gray-400">
-            Calm coins with the lowest model confidence -- statistically closest to a regime change.
-          </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <section className="csl-signal-section csl-signal-section-early">
+          <div className="csl-signal-section-heading"><div><p className="csl-kicker">Transition watch</p><h2>Early signals</h2><p>Building assets with the lowest confidence — statistically closest to a regime transition.</p></div></div>
+          <div className="csl-signal-grid">
             {watching.map((coin) => (
               <CoinCard key={coin.id} coin={coin} />
             ))}
