@@ -62,10 +62,6 @@ export default function Hero({ coins }: { coins: Coin[] }) {
             ))}
           </div>
         </figure>
-        <div className="csl-hero-market-now" data-regime={dominant} aria-label={`Market now: ${marketLabel}`}>
-          <span className="csl-hero-market-label">Market now</span>
-          <span className="csl-hero-market-value"><i aria-hidden="true" />{marketLabel}</span>
-        </div>
       </div>
     </section>
   );

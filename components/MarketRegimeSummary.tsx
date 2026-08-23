@@ -11,16 +11,13 @@ export default function MarketRegimeSummary({ coins, updatedLabel }: { coins: Co
 
   return (
     <section className="csl-market-reading" aria-labelledby="market-reading-title">
-      <div className="csl-market-reading-topline">
-        <p className="csl-kicker">Latest market reading</p>
-        <p className="csl-market-timestamp">{updatedLabel ? "Updated " + updatedLabel : "Latest available snapshot"}</p>
-      </div>
+      <div className="csl-market-reading-topline"><p className="csl-kicker">Latest market reading</p></div>
       <div className="csl-market-reading-primary">
         <div>
           <p className="csl-market-state-label">Market state</p>
           <h2 id="market-reading-title" className="csl-market-state" data-regime={dominant}><i aria-hidden="true" />{TIER_CONFIG[dominant].label}</h2>
         </div>
-        <p className="csl-market-total"><strong>{total}</strong> assets analysed</p>
+        <p className="csl-market-total"><strong>{total}</strong> assets analysed · {updatedLabel ? "Updated " + updatedLabel : "Latest available snapshot"}</p>
       </div>
       <div className="csl-market-spectrum" aria-label={"Market distribution across " + total + " tracked assets"}>
         {TIERS.map((tier) => (
