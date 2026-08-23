@@ -1,45 +1,147 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Visual roles, shared across all pages and components. */
+  --csl-ink: #10172d;
+  --csl-ink-muted: #5c667d;
+  --csl-ink-subtle: #7f899d;
+  --csl-canvas: #f9fbff;
+  --csl-surface: rgb(255 255 255 / 86%);
+  --csl-surface-solid: #ffffff;
+  --csl-surface-muted: #f4f7fd;
+  --csl-border: rgb(116 132 163 / 18%);
+  --csl-border-strong: rgb(99 116 148 / 30%);
 
-  /* CoinSparkLine brand palette, sourced from the logo */
-  --brand-navy: #0f172a;
+  --brand-navy: #10172d;
   --brand-blue: #2563eb;
-  --brand-cyan: #22d3ee;
-  --brand-violet: #8b5cf6;
-  --brand-magenta: #ec4899;
+  --brand-violet: #7957e8;
+  --brand-magenta: #dc4f91;
+  --brand-cyan: #22b8cf;
+  --brand-gradient: linear-gradient(112deg, var(--brand-blue) 0%, var(--brand-violet) 52%, var(--brand-magenta) 100%);
+
+  /* Signal colors are semantic, never brand-gradient substitutions. */
+  --regime-calm: #17884d;
+  --regime-building: #b77905;
+  --regime-awakening: #d46216;
+  --regime-volatile: #cf3f6e;
+  --regime-calm-soft: #eaf8f0;
+  --regime-building-soft: #fff8df;
+  --regime-awakening-soft: #fff0e4;
+  --regime-volatile-soft: #fff0f5;
+
+  --csl-content-max: 77.5rem;
+  --csl-page-gutter: clamp(1.25rem, 3vw, 2rem);
+  --csl-section-space: clamp(2.5rem, 6vw, 5rem);
+  --csl-stack-space: clamp(1.25rem, 2vw, 1.75rem);
+  --csl-radius-sm: 0.625rem;
+  --csl-radius-md: 0.875rem;
+  --csl-radius-lg: 1.125rem;
+  --csl-radius-xl: 1.5rem;
+  --csl-shadow-xs: 0 1px 2px rgb(16 23 45 / 3.5%);
+  --csl-shadow-sm: 0 8px 24px rgb(41 61 105 / 7%);
+  --csl-shadow-md: 0 18px 48px rgb(41 61 105 / 11%);
+  --csl-focus-ring: 0 0 0 3px rgb(37 99 235 / 20%);
+  --csl-duration-fast: 180ms;
+  --csl-duration-base: 260ms;
+  --csl-duration-slow: 380ms;
+  --csl-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --font-sans: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Avenir Next", Avenir, "Segoe UI Variable Display", "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
+  --color-background: var(--csl-canvas);
+  --color-foreground: var(--csl-ink);
+  --font-sans: var(--font-sans);
   --color-brand-navy: var(--brand-navy);
   --color-brand-blue: var(--brand-blue);
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-violet: var(--brand-violet);
   --color-brand-magenta: var(--brand-magenta);
+  --color-regime-calm: var(--regime-calm);
+  --color-regime-building: var(--regime-building);
+  --color-regime-awakening: var(--regime-awakening);
+  --color-regime-volatile: var(--regime-volatile);
+  --radius-csl-sm: var(--csl-radius-sm);
+  --radius-csl-md: var(--csl-radius-md);
+  --radius-csl-lg: var(--csl-radius-lg);
+  --radius-csl-xl: var(--csl-radius-xl);
+  --shadow-csl-xs: var(--csl-shadow-xs);
+  --shadow-csl-sm: var(--csl-shadow-sm);
+  --shadow-csl-md: var(--csl-shadow-md);
+}
+
+* { border-color: var(--csl-border); }
+
+html {
+  background: var(--csl-canvas);
+  color: var(--csl-ink);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-
-  /* A light, premium fintech background: two extremely soft color washes
-     (blue top-left, violet/pink bottom-right, echoing the logo's own
-     background) plus a barely-visible dot grid. Stays ~85-90% white --
-     these are all very low-opacity, large, soft gradients, not solid color. */
-  background-color: #ffffff;
+  min-width: 20rem;
+  color: var(--csl-ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+  background-color: var(--csl-canvas);
   background-image:
-    radial-gradient(ellipse 900px 600px at 8% -5%, rgba(37, 99, 235, 0.10), transparent 60%),
-    radial-gradient(ellipse 900px 700px at 100% 15%, rgba(139, 92, 246, 0.08), transparent 55%),
-    radial-gradient(ellipse 1000px 800px at 90% 100%, rgba(236, 72, 153, 0.08), transparent 55%),
-    radial-gradient(circle, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
-  background-size: auto, auto, auto, 28px 28px;
-  background-attachment: fixed, fixed, fixed, fixed;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+    radial-gradient(ellipse 72rem 44rem at -10% -14%, rgb(37 99 235 / 12%), transparent 60%),
+    radial-gradient(ellipse 64rem 46rem at 106% 6%, rgb(121 87 232 / 10%), transparent 60%),
+    radial-gradient(ellipse 56rem 40rem at 86% 100%, rgb(220 79 145 / 7.5%), transparent 62%),
+    linear-gradient(rgb(91 111 151 / 3.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(91 111 151 / 3.5%) 1px, transparent 1px);
+  background-size: auto, auto, auto, 2rem 2rem, 2rem 2rem;
+  background-attachment: fixed;
+}
+
+::selection { color: #ffffff; background: var(--brand-violet); }
+
+:where(h1, h2, h3) {
+  color: var(--csl-ink);
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+:where(h1) { font-size: clamp(2rem, 4.5vw, 4.25rem); }
+:where(h2) { font-size: clamp(1.5rem, 2.6vw, 2.5rem); }
+:where(h3) { font-size: clamp(1.125rem, 1.7vw, 1.5rem); }
+:where(a, button, input, select, textarea) { -webkit-tap-highlight-color: transparent; }
+:where(a, button, input, select, textarea):focus-visible { outline: none; box-shadow: var(--csl-focus-ring); }
+
+:where(button, [role="button"], select) {
+  transition: color var(--csl-duration-fast) var(--csl-ease), background-color var(--csl-duration-fast) var(--csl-ease), border-color var(--csl-duration-fast) var(--csl-ease), box-shadow var(--csl-duration-fast) var(--csl-ease), transform var(--csl-duration-fast) var(--csl-ease);
+}
+
+/* Reusable primitives for later page stages. */
+.csl-page { width: min(100%, var(--csl-content-max)); margin-inline: auto; padding-inline: var(--csl-page-gutter); }
+.csl-section { margin-block: var(--csl-section-space); }
+.csl-stack { display: grid; gap: var(--csl-stack-space); }
+.csl-surface { border: 1px solid var(--csl-border); border-radius: var(--csl-radius-lg); background: var(--csl-surface); box-shadow: var(--csl-shadow-xs); backdrop-filter: blur(14px); }
+.csl-surface-raised { border: 1px solid var(--csl-border); border-radius: var(--csl-radius-xl); background: var(--csl-surface-solid); box-shadow: var(--csl-shadow-sm); }
+.csl-surface-muted { border: 1px solid rgb(116 132 163 / 12%); border-radius: var(--csl-radius-md); background: var(--csl-surface-muted); }
+.csl-kicker { color: var(--csl-ink-subtle); font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.12em; line-height: 1.2; text-transform: uppercase; }
+.csl-gradient-text { background: var(--brand-gradient); background-clip: text; -webkit-background-clip: text; color: transparent; }
+.csl-button, .csl-control { display: inline-flex; align-items: center; justify-content: center; min-height: 2.625rem; border-radius: var(--csl-radius-sm); font-size: 0.875rem; font-weight: 600; line-height: 1; }
+.csl-button { gap: 0.5rem; padding: 0.75rem 1rem; }
+.csl-button-primary { color: #ffffff; border: 1px solid transparent; background: var(--brand-gradient); box-shadow: 0 8px 20px rgb(82 82 211 / 20%); }
+.csl-button-primary:hover { box-shadow: 0 12px 26px rgb(82 82 211 / 27%); transform: translateY(-1px); }
+.csl-button-secondary, .csl-control { color: var(--csl-ink); border: 1px solid var(--csl-border); background: rgb(255 255 255 / 74%); box-shadow: var(--csl-shadow-xs); }
+.csl-button-secondary:hover, .csl-control:hover { border-color: var(--csl-border-strong); background: #ffffff; box-shadow: var(--csl-shadow-sm); }
+.csl-button-ghost { color: var(--csl-ink-muted); border: 1px solid transparent; background: transparent; }
+.csl-button-ghost:hover { color: var(--csl-ink); background: rgb(37 99 235 / 6.5%); }
+.csl-pill { min-height: 2.25rem; padding-inline: 0.875rem; border-radius: 999px; }
+.csl-pill[data-active="true"] { color: #ffffff; border-color: transparent; background: var(--brand-gradient); box-shadow: 0 6px 16px rgb(82 82 211 / 20%); }
+
+@media (max-width: 40rem) {
+  body { background-size: auto, auto, auto, 1.5rem 1.5rem, 1.5rem 1.5rem; }
+  .csl-button { min-height: 2.75rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
