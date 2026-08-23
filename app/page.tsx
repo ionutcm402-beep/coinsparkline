@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HomeClient from "@/components/HomeClient";
-import { getLatestScan } from "@/lib/blobStorage";
+import { getLatestScan, getPreviousScan } from "@/lib/blobStorage";
 import { mockCoins, categories } from "@/lib/mockData";
 import { formatRelativeTime } from "@/lib/relativeTime";
 import { fetchTopCoins } from "@/lib/coingecko";
@@ -9,7 +9,11 @@ import { fetchTopCoins } from "@/lib/coingecko";
 export const revalidate = 300;
 
 export default async function Home() {
-  const snapshot = await getLatestScan();
+  const [snapshot, previousSnapshot] = await Promise.all([
+    getLatestScan(),
+    getPreviousScan(),
+  ]);
+
   const coins = snapshot && snapshot.coins.length > 0 ? snapshot.coins : mockCoins;
   const isLiveData = Boolean(snapshot);
 
@@ -26,6 +30,8 @@ export default async function Home() {
       <Hero coins={coins} />
       <HomeClient
         coins={coins}
+        previousCoins={previousSnapshot?.coins ?? []}
+        previousScannedAt={previousSnapshot?.scannedAt}
         marketCoins={marketCoins}
         categories={categories}
         updatedLabel={isLiveData ? formatRelativeTime(snapshot!.scannedAt) : undefined}
