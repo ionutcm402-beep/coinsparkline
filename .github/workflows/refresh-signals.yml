@@ -2,7 +2,7 @@ name: Refresh CoinSparkLine signals
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Trigger protected signal refresh
+      - name: Trigger protected rolling signal refresh
         env:
           REFRESH_URL: ${{ secrets.CSL_REFRESH_URL }}
           CRON_SECRET: ${{ secrets.CSL_CRON_SECRET }}
@@ -23,6 +23,13 @@ jobs:
             echo "Missing repository secret CSL_CRON_SECRET"
             exit 1
           fi
+
+          # Seven hourly batches cover the full top-200 universe (30 x 6 + 20).
+          # Epoch-hours keeps the rotation continuous across midnight.
+          EPOCH_HOURS=$(( $(date -u +%s) / 3600 ))
+          SLOT=$(( EPOCH_HOURS % 7 ))
+          OFFSET=$(( SLOT * 30 ))
+
           curl --fail-with-body --retry 2 --retry-delay 20 \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "${REFRESH_URL}?n=30&days=365"
+            "${REFRESH_URL}?total=200&batch=30&offset=${OFFSET}&days=365"
