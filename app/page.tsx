@@ -34,24 +34,28 @@ export default async function Home() {
       .home-client-wrap > main > div:last-child > aside > section:last-child{display:none}
       @media (min-width: 900px){
         .home-page-scale{
+          width:89.3%;
+          margin-inline:auto;
+          zoom:1.12;
+        }
+        .home-dashboard-scale{
           width:92.6%;
           margin-inline:auto;
           zoom:1.08;
         }
-        .home-dashboard-scale{
-          width:88.2%;
-          margin-inline:auto;
-          zoom:1.134;
+        .home-client-wrap main{
+          padding-top:1.25rem;
+          padding-bottom:2rem;
         }
       }
       @media (min-width: 1500px){
         .home-page-scale{
-          width:91.3%;
-          zoom:1.095;
+          width:87.7%;
+          zoom:1.14;
         }
         .home-dashboard-scale{
-          width:86.6%;
-          zoom:1.155;
+          width:91%;
+          zoom:1.10;
         }
       }
     `}</style>
