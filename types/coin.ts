@@ -13,6 +13,7 @@ export interface Coin {
   medianDaysToFlip: number;
   logoUrl?: string;
   marketCap?: number | null;
+  marketCapRank?: number | null;
   // Last ~30 days of regime states (0=calm, 1=volatile), for the mini
   // sparkline on each card. Represents the SIGNAL, not raw price, per design intent.
   recentStates?: number[];
