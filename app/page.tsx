@@ -14,5 +14,5 @@ export default async function Home(){
  const freshness=getDataFreshness(snapshot?.scannedAt);
  const relative=snapshot?formatRelativeTime(snapshot.scannedAt):undefined;
  const statusLabel=relative?`${freshness.label} · ${relative}`:freshness.label;
- return <div className="flex-1"><Header/><HomeV2 coins={coins} updatedLabel={statusLabel}/><Footer/></div>;
+ return <div className="flex-1"><Header coins={coins}/><HomeV2 coins={coins} updatedLabel={statusLabel}/><Footer/></div>;
 }
