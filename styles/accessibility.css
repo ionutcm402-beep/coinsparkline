@@ -1,0 +1,5 @@
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid #2457d6;outline-offset:3px}
+:where(button,a,[role="button"]){-webkit-tap-highlight-color:transparent}
+.csl-auth-label{display:grid;gap:7px;color:#334155;font-size:12px;font-weight:700;text-align:left}
+@media (pointer:coarse){:where(button,a,[role="button"],input,select){min-height:44px}}
+@media (prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto!important}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
