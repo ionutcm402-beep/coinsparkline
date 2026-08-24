@@ -10,7 +10,7 @@ function Logo(){return <div className="flex items-center gap-2"><svg viewBox="0 
 
 export default function Header(){
  const pathname=usePathname();const{currency,setCurrency}=useCurrency();const[menu,setMenu]=useState(false);const[signedIn,setSignedIn]=useState(false);const[ready,setReady]=useState(false);
- const nav=[{href:"/",label:"Market"},{href:"/#discover",label:"Discover"},{href:"/nft",label:"NFT"},{href:"/watchlist",label:"Watchlist"},{href:"/portfolio",label:"Portfolio"},{href:"/compare",label:"Compare"},{href:"/alerts",label:"Alerts"}];
+ const nav=[{href:"/",label:"Market"},{href:"/#discover",label:"Discover"},{href:"/opportunities",label:"Radar"},{href:"/nft",label:"NFT"},{href:"/watchlist",label:"Watchlist"},{href:"/portfolio",label:"Portfolio"},{href:"/compare",label:"Compare"},{href:"/alerts",label:"Alerts"}];
  useEffect(()=>{let active=true;try{const s=getSupabaseBrowserClient();s.auth.getUser().then(({data})=>{if(active){setSignedIn(!!data.user);setReady(true)}});const{data:{subscription}}=s.auth.onAuthStateChange((_e,session)=>{if(active){setSignedIn(!!session?.user);setReady(true)}});return()=>{active=false;subscription.unsubscribe()}}catch{setReady(true);return()=>{active=false}}},[]);
  async function signOut(){try{await getSupabaseBrowserClient().auth.signOut()}finally{window.location.href="/"}}
  const isActive=(href:string)=>href==="/"?pathname==="/":href.startsWith("/#")?false:pathname===href||pathname.startsWith(href+"/");
