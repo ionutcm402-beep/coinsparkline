@@ -12,6 +12,7 @@ import "../styles/coin-detail-reference.css";
 import "../styles/personal-intelligence.css";
 import "../styles/secondary-discovery.css";
 import "../styles/trust-pages.css";
+import "../styles/accessibility.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import PWARegister from "@/components/PWARegister";
