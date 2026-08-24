@@ -16,7 +16,7 @@ const nav=[
 export default function Header({coins=[]}:{coins?:Coin[]}){
  const pathname=usePathname();const{currency,setCurrency}=useCurrency();const[menu,setMenu]=useState(false);const[signedIn,setSignedIn]=useState(false);const[ready,setReady]=useState(false);const[commandCoins,setCommandCoins]=useState<Coin[]>(coins);
  useEffect(()=>{setMenu(false)},[pathname]);
- useEffect(()=>{if(coins.length){setCommandCoins(coins);return}let active=true;fetch("/api/header-coins").then(r=>r.ok?r.json():null).then(result=>{if(active&&Array.isArray(result?.data?.coins))setCommandCoins(result.data.coins)}).catch(()=>{});return()=>{active=false}},[coins]);
+ useEffect(()=>{if(coins.length){setCommandCoins(coins);return}let active=true;fetch("/api/header-coins").then(r=>r.ok?r.json():null).then(result=>{if(active&&Array.isArray(result?.coins))setCommandCoins(result.coins)}).catch(()=>{});return()=>{active=false}},[coins]);
  useEffect(()=>{let active=true;try{const s=getSupabaseBrowserClient();s.auth.getUser().then(({data})=>{if(active){setSignedIn(!!data.user);setReady(true)}});const{data:{subscription}}=s.auth.onAuthStateChange((_e,session)=>{if(active){setSignedIn(!!session?.user);setReady(true)}});return()=>{active=false;subscription.unsubscribe()}}catch{setReady(true);return()=>{active=false}}},[]);
  async function signOut(){try{await getSupabaseBrowserClient().auth.signOut()}finally{window.location.href="/"}}
  const isActive=(href:string)=>href==="/"?pathname==="/":pathname===href||pathname.startsWith(href+"/");
