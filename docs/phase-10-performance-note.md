@@ -1,1 +1,0 @@
-The Phase 10 preview build verified that scan-backed discovery routes prerender with a 60-second revalidation window after introducing cached read-only snapshot access. Refresh writes remain uncached and explicitly invalidate the snapshot tag after success.
