@@ -17,6 +17,7 @@ export default function ScannerCard({ coin }: { coin: Coin }) {
   const positive=coin.change24hPct>=0;
   const spark=getSparkScore(coin);
   const explanation=explainSignal(coin);
+  const scoreTone=spark.score>=70?"from-fuchsia-500 via-violet-500 to-indigo-500":spark.score>=55?"from-violet-500 via-indigo-500 to-sky-500":"from-sky-500 via-cyan-500 to-emerald-400";
 
   useEffect(()=>{
     if(!open) return;
@@ -41,9 +42,9 @@ export default function ScannerCard({ coin }: { coin: Coin }) {
           <p className={`rounded-full px-2.5 py-1 text-[9px] font-bold ${positive?"bg-emerald-50 text-emerald-600":"bg-rose-50 text-rose-600"}`}>{positive?"+":""}{coin.change24hPct.toFixed(2)}%</p>
         </div>
 
-        <div className="mt-5 rounded-[16px] bg-[#0b0b10] px-3.5 py-3 text-white shadow-[0_12px_28px_rgba(15,23,42,.13)]">
-          <div className="flex items-center justify-between gap-2"><span className="text-[8px] font-bold uppercase tracking-[0.14em] text-white/65">SparkScore</span><span className="text-[9px] font-semibold text-white/65">{spark.label}</span></div>
-          <div className="mt-1 flex items-end justify-between gap-2"><span className="text-[24px] font-black leading-none tracking-[-0.055em]">{spark.score}</span><span className="pb-0.5 text-[8px] font-semibold text-white/50">/ 100</span></div>
+        <div className="mt-5 overflow-hidden rounded-[17px] border border-indigo-100/80 bg-gradient-to-br from-white via-indigo-50/70 to-fuchsia-50/70 px-3.5 py-3 shadow-[0_10px_24px_rgba(99,102,241,.08)]">
+          <div className="flex items-center justify-between gap-2"><span className="text-[8px] font-extrabold uppercase tracking-[0.14em] text-slate-500">SparkScore</span><span className="text-[9px] font-semibold text-indigo-500">{spark.label}</span></div>
+          <div className="mt-2 flex items-end justify-between gap-3"><div className="flex items-end gap-1"><span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-[26px] font-black leading-none tracking-[-0.055em] text-transparent">{spark.score}</span><span className="pb-0.5 text-[8px] font-bold text-slate-400">/100</span></div><div className="h-2 w-[45%] overflow-hidden rounded-full bg-white/90 shadow-inner"><div className={`h-full rounded-full bg-gradient-to-r ${scoreTone}`} style={{width:`${spark.score}%`}}/></div></div>
         </div>
 
         <div className={`mt-3 rounded-[15px] ${config.bg} px-3.5 py-3`}>
@@ -54,7 +55,7 @@ export default function ScannerCard({ coin }: { coin: Coin }) {
 
       <div className="flex items-center gap-2 border-t border-slate-100/80 px-3.5 py-3 sm:px-4">
         <button type="button" onClick={()=>setOpen(true)} className="premium-card-action flex-1">Why this signal?</button>
-        <div className="flex-1 [&>button]:w-full [&>button]:min-h-[34px] [&>button]:rounded-full [&>button]:border [&>button]:border-slate-200/80 [&>button]:bg-white [&>button]:px-3 [&>button]:text-[9px] [&>button]:font-bold [&>button]:text-slate-600 [&>button]:shadow-[0_4px_12px_rgba(15,23,42,.035)] [&>button]:transition-all hover:[&>button]:-translate-y-px hover:[&>button]:border-indigo-200 hover:[&>button]:text-indigo-600"><AlertRuleButton coinId={coin.id} compact/></div>
+        <div className="flex-1 [&>button]:w-full [&>button]:min-h-[36px] [&>button]:rounded-full [&>button]:border [&>button]:border-indigo-100 [&>button]:bg-gradient-to-b [&>button]:from-white [&>button]:to-indigo-50/70 [&>button]:px-3 [&>button]:text-[9px] [&>button]:font-bold [&>button]:text-indigo-600 [&>button]:shadow-[0_5px_14px_rgba(99,102,241,.055)] [&>button]:transition-all hover:[&>button]:-translate-y-px hover:[&>button]:border-indigo-200 hover:[&>button]:shadow-[0_8px_18px_rgba(99,102,241,.10)]"><AlertRuleButton coinId={coin.id} compact/></div>
       </div>
     </article>
 
@@ -69,7 +70,7 @@ export default function ScannerCard({ coin }: { coin: Coin }) {
         <p className="mt-2 text-[13px] leading-6 text-slate-600">{explanation.summary}</p>
         <div className="mt-4 space-y-2.5">{explanation.reasons.map((reason,i)=><div key={i} className="flex gap-2.5 rounded-xl bg-slate-50 px-3 py-2.5"><span className="mt-[7px] h-2 w-2 shrink-0 rounded-full bg-violet-500"/><p className="text-[12px] leading-5 text-slate-600">{reason}</p></div>)}</div>
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">{[["Confidence",spark.confidence],["Freshness",spark.freshness],["Flip pressure",spark.transitionPressure],["24h activity",spark.marketMove]].map(([label,value])=><div key={String(label)} className="rounded-xl border border-slate-200 bg-white p-3 text-center"><p className="text-[9px] font-bold uppercase tracking-[.08em] text-slate-400">{label}</p><p className="mt-1 text-[17px] font-extrabold text-slate-900">{Number(value).toFixed(0)}</p></div>)}</div>
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"><p className="max-w-[360px] text-[10px] leading-4 text-slate-400">{explanation.caution}</p><Link href={`/coin/${coin.id}`} onClick={()=>setOpen(false)} className="rounded-full bg-slate-950 px-4 py-2 text-[11px] font-bold text-white hover:bg-violet-700">Full coin analysis →</Link></div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"><p className="max-w-[360px] text-[10px] leading-4 text-slate-400">{explanation.caution}</p><Link href={`/coin/${coin.id}`} onClick={()=>setOpen(false)} className="rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-[11px] font-bold text-white shadow-[0_8px_20px_rgba(99,102,241,.18)] hover:from-indigo-500 hover:to-violet-500">Full coin analysis →</Link></div>
       </section>
     </div>}
   </>;
