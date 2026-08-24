@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./mobile-polish.css";
+import "./premium-home.css";
 import FlowingLines from "@/components/FlowingLines";
 import { CurrencyProvider } from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
