@@ -1,0 +1,8 @@
+import SignalsHub from "@/components/SignalsHub";
+import type {WatchlistItem} from "@/components/WatchlistClient";
+import {getLatestScan} from "@/lib/blobStorage";
+import {fetchTopCoins} from "@/lib/coingecko";
+import {getSignalTier,TIER_CONFIG} from "@/lib/tiers";
+import {getSparkScore} from "@/lib/sparkScore";
+export const revalidate=300;
+export default async function SignalsPage({searchParams}:{searchParams:Promise<{tab?:string;coin?:string}>}){const params=await searchParams;const[snapshot,marketResult]=await Promise.all([getLatestScan(),fetchTopCoins(250,process.env.COINGECKO_API_KEY).catch(()=>[])]);const tracked=snapshot?.coins??[],trackedIds=new Set(tracked.map(c=>c.id));const watchItems:WatchlistItem[]=[...tracked.map(c=>{const tier=getSignalTier(c);return{id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),image:c.logoUrl||"",price:c.price,change24h:c.change24hPct,rank:c.marketCapRank??null,regime:TIER_CONFIG[tier].label,confidence:c.confidencePct,sparkScore:getSparkScore(c).score}}),...marketResult.filter(c=>!trackedIds.has(c.id)).map(c=>({id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),image:c.image,price:c.current_price,change24h:c.price_change_percentage_24h??0,rank:c.market_cap_rank}))];const market=marketResult.map(c=>({id:c.id,symbol:c.symbol.toUpperCase(),name:c.name,price:c.current_price,change24h:c.price_change_percentage_24h??0,image:c.image,rank:c.market_cap_rank}));const tab=params.tab==="portfolio"?"Portfolio":params.tab==="alerts"?"Alerts":"Watching";return <SignalsHub watchItems={watchItems} market={market} initialTab={tab} initialSymbol={(params.coin||"").toUpperCase()}/>}
