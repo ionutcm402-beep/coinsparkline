@@ -1,0 +1,12 @@
+"use client";
+
+import {useEffect,useState} from "react";
+
+type Event={id:string;asset_class:string;asset_id:string;symbol:string;event_type:string;title:string;body:string;importance:number;created_at:string};
+function age(value:string){const seconds=Math.max(0,Math.floor((Date.now()-new Date(value).getTime())/1000));if(seconds<60)return `${seconds}s`;const minutes=Math.floor(seconds/60);if(minutes<60)return `${minutes}m`;const hours=Math.floor(minutes/60);if(hours<24)return `${hours}h`;return `${Math.floor(hours/24)}d`;}
+
+export default function TerminalEventFeed({onSelect}:{onSelect?:(symbol:string)=>void}){
+ const[events,setEvents]=useState<Event[]>([]),[state,setState]=useState<"loading"|"live"|"empty"|"degraded">("loading");
+ useEffect(()=>{let mounted=true;async function load(){try{const response=await fetch("/api/intelligence-events",{cache:"no-store"});if(!response.ok)throw new Error();const result=await response.json();if(!mounted)return;const next=Array.isArray(result.events)?result.events:[];setEvents(next);setState(next.length?"live":"empty");}catch{if(mounted)setState("degraded")}}void load();const timer=window.setInterval(load,30000);return()=>{mounted=false;window.clearInterval(timer)}},[]);
+ return <section className="terminal-panel terminal-event-feed"><header className="terminal-panel-head"><div><span className="terminal-eyebrow">Live intelligence</span><h2>What just changed</h2></div><span className="terminal-status" data-state={state==="live"?"live":state==="degraded"?"degraded":"connecting"}>{state==="live"?"Recording":state==="degraded"?"Unavailable":state==="empty"?"Armed":"Loading"}</span></header>{state==="empty"?<div className="terminal-event-empty"><strong>Event engine armed.</strong><span>The next meaningful SparkScore, confidence or regime change will appear here automatically.</span></div>:null}{state==="degraded"?<div className="terminal-event-empty"><strong>Feed temporarily unavailable.</strong><span>Current Radar data remains available.</span></div>:null}<div className="terminal-event-list">{events.slice(0,8).map(event=><button key={event.id} onClick={()=>onSelect?.(event.symbol)}><time>{age(event.created_at)}</time><span><b>${event.symbol}</b><strong>{event.title.replace(`${event.symbol} `,"")}</strong><small>{event.body}</small></span><em data-importance={event.importance>=85?"high":"normal"}>{event.importance}</em></button>)}</div>{events.length?<p>Recorded from actual scan-to-scan model changes. No simulated activity.</p>:null}</section>;
+}

@@ -1,0 +1,5 @@
+"use client";
+import Link from "next/link";
+import {useEffect,useState} from "react";
+import {getSupabaseBrowserClient} from "@/lib/supabaseClient";
+export default function TerminalAccountNudge({symbol}:{symbol?:string|null}){const[state,setState]=useState<"loading"|"guest"|"member">("loading");useEffect(()=>{let active=true;getSupabaseBrowserClient().auth.getUser().then(({data})=>{if(active)setState(data.user?"member":"guest")}).catch(()=>{if(active)setState("guest")});return()=>{active=false}},[]);if(state==="loading")return null;if(state==="member")return <Link className="terminal-account-synced" href="/signals">MY SIGNALS · synced →</Link>;const next=symbol?`/signals?coin=${encodeURIComponent(symbol)}&tab=portfolio`:"/signals";return <div className="terminal-account-nudge"><span><b>Keep watching{symbol?` $${symbol.toUpperCase()}`:" this market"}.</b><small>Sync watchlists and alerts across devices.</small></span><Link href={`/signup?next=${encodeURIComponent(next)}`}>Create free account</Link></div>}
