@@ -40,8 +40,8 @@ export default function AlertsPage(){
    setSignedIn(true);
    const response=await supabase.from("alert_rules").select("coin_id,type,threshold,created_at").eq("user_id",user.id).eq("enabled",true).order("created_at",{ascending:false});
    if(response.error)throw response.error;
-   const remote=((response.data??[]) as AlertRuleRow[]).map(r=>({coinId:r.coin_id,type:r.type,threshold:r.threshold??undefined,createdAt:r.created_at}));
-   const merged=[...remote];
+   const remote:AlertRule[]=((response.data??[]) as AlertRuleRow[]).map(r=>({coinId:r.coin_id,type:r.type,threshold:r.threshold??undefined,createdAt:r.created_at}));
+   const merged:AlertRule[]=[...remote];
    for(const item of local){if(!merged.some(r=>r.coinId===item.coinId&&r.type===item.type))merged.push(item)}
    setRules(merged);
    setStatus(`Synced to your CoinSparkLine account · ${remote.length} cloud rule${remote.length===1?"":"s"}`);
