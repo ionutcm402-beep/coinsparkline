@@ -1,5 +1,0 @@
-"use client";
-import Link from "next/link";
-import {usePathname} from "next/navigation";
-const items=[{href:"/",label:"Market",icon:"⌁"},{href:"/opportunities",label:"Radar",icon:"◎"},{href:"/screener",label:"Screen",icon:"≡"},{href:"/portfolio",label:"Portfolio",icon:"◫"},{href:"/alerts",label:"Alerts",icon:"◌"}];
-export default function MobileDock(){const pathname=usePathname();return <nav className="fixed inset-x-2 bottom-2 z-[110] grid grid-cols-5 rounded-[22px] border border-white/70 bg-white/92 p-1.5 shadow-[0_18px_55px_rgba(15,23,42,.18)] backdrop-blur-xl md:hidden" aria-label="Mobile navigation">{items.map(item=>{const active=item.href==="/"?pathname==="/":pathname.startsWith(item.href);return <Link key={item.href} href={item.href} className={`flex min-h-[52px] flex-col items-center justify-center rounded-[16px] text-[9px] font-bold transition ${active?"bg-gradient-to-b from-blue-50 to-indigo-50 text-blue-700":"text-slate-500"}`}><span className={`mb-0.5 text-[18px] leading-none ${active?"text-indigo-600":"text-slate-400"}`}>{item.icon}</span>{item.label}</Link>})}</nav>}
