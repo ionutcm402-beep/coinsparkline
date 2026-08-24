@@ -1,9 +1,7 @@
-import { unstable_cache } from "next/cache";
-
 export type NftCollection = {
   id: string;
   name: string;
-  slug: string | null;
+  slug: string;
   image: string | null;
   floor: number | null;
   volume24h: number | null;
@@ -12,218 +10,232 @@ export type NftCollection = {
   owners: number | null;
   tokenCount: number | null;
   chain: string;
-  marketplaceUrl: string | null;
-};
-
-export type NftApiHealth = {
-  configured: boolean;
-  ok: boolean;
-  status: number | null;
-  endpoint: string | null;
-  message: string;
-  responseKeys: string[];
-  rowCount: number;
+  marketplaceUrl: string;
 };
 
 const API = "https://api.opensea.io/api/v2";
 
-function num(v: any) {
-  const n = typeof v === "string" ? Number(v) : v;
+function numberOrNull(value: unknown): number | null {
+  const n = typeof value === "string" ? Number(value) : value;
   return typeof n === "number" && Number.isFinite(n) ? n : null;
 }
 
-function first(...values: any[]) {
-  return values.find((v) => v !== undefined && v !== null);
+function firstDefined<T>(...values: T[]): T | undefined {
+  return values.find((value) => value !== undefined && value !== null && value !== "");
 }
 
-function mapCollection(c: any): NftCollection {
-  const collection = c.collection || c.collection_data || c;
-  const stats = c.stats || c.statistics || c.collection_stats || {};
-  const total = stats.total || c.total || {};
-  const oneDay =
-    stats.intervals?.find?.((x: any) =>
-      ["one_day", "1_day", "1d", "day", "ONE_DAY"].includes(String(x.interval || x.period || x.timeframe || ""))
-    ) ||
-    c.one_day ||
-    c.oneDay ||
-    c.one_day_stats ||
-    {};
-  const sevenDay =
-    stats.intervals?.find?.((x: any) =>
-      ["seven_days", "7_days", "7d", "SEVEN_DAYS"].includes(String(x.interval || x.period || x.timeframe || ""))
-    ) ||
-    c.seven_day ||
-    c.sevenDay ||
-    c.seven_day_stats ||
-    {};
+function slugFromRankingRow(row: any): string | null {
+  if (typeof row?.collection === "string") return row.collection;
+  return (
+    firstDefined(
+      row?.collection?.slug,
+      row?.slug,
+      row?.collection_slug,
+      row?.collectionSlug,
+      row?.id,
+    ) || null
+  );
+}
 
-  const slug = String(first(collection.slug, c.slug, collection.collection, "") || "") || null;
+async function openSea(path: string): Promise<any> {
+  const key = process.env.OPENSEA_API_KEY;
+  if (!key) throw new Error("OPENSEA_API_KEY is not configured");
+
+  const response = await fetch(`${API}${path}`, {
+    headers: {
+      accept: "application/json",
+      "x-api-key": key,
+    },
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(12000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenSea request failed (${response.status}) for ${path}`);
+  }
+
+  return response.json();
+}
+
+function rankingRows(payload: any): any[] {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.collections)) return payload.collections;
+  if (Array.isArray(payload?.results)) return payload.results;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+}
+
+function interval(stats: any, label: string): any {
+  const intervals = Array.isArray(stats?.intervals) ? stats.intervals : [];
+  const target = label.toLowerCase();
+  return (
+    intervals.find((item: any) =>
+      String(item?.interval ?? item?.period ?? item?.timeframe ?? "")
+        .toLowerCase()
+        .includes(target),
+    ) || {}
+  );
+}
+
+async function enrichCollection(row: any): Promise<NftCollection | null> {
+  const slug = slugFromRankingRow(row);
+  if (!slug) return null;
+
+  const [detailsResult, statsResult] = await Promise.allSettled([
+    openSea(`/collections/${encodeURIComponent(slug)}`),
+    openSea(`/collections/${encodeURIComponent(slug)}/stats`),
+  ]);
+
+  const details = detailsResult.status === "fulfilled" ? detailsResult.value : {};
+  const stats = statsResult.status === "fulfilled" ? statsResult.value : {};
+  const collection = details?.collection ?? details ?? {};
+  const total = stats?.total ?? stats?.stats?.total ?? {};
+  const oneDay =
+    stats?.intervals?.find?.((x: any) =>
+      ["one_day", "1d", "day", "one day"].includes(
+        String(x?.interval ?? x?.period ?? x?.timeframe ?? "").toLowerCase(),
+      ),
+    ) ?? interval(stats, "day");
+  const sevenDay =
+    stats?.intervals?.find?.((x: any) =>
+      ["seven_day", "7d", "seven days", "week"].includes(
+        String(x?.interval ?? x?.period ?? x?.timeframe ?? "").toLowerCase(),
+      ),
+    ) ?? interval(stats, "7");
+
+  const rowStats = row?.stats ?? row?.statistics ?? {};
+  const rowTotal = rowStats?.total ?? {};
+  const rowOneDay = rowStats?.one_day ?? rowStats?.oneDay ?? row?.one_day ?? {};
+  const rowSevenDay = rowStats?.seven_day ?? rowStats?.sevenDay ?? row?.seven_day ?? {};
+
   const chainRaw = String(
-    first(collection.chain, c.chain, collection.contracts?.[0]?.chain, collection.contracts?.[0]?.chain_identifier, "ethereum") ||
-      "ethereum"
+    firstDefined(
+      collection?.contracts?.[0]?.chain,
+      collection?.chain,
+      row?.chain,
+      row?.collection?.chain,
+      "ethereum",
+    ),
+  );
+
+  const name = String(
+    firstDefined(
+      collection?.name,
+      row?.collection?.name,
+      row?.name,
+      slug
+        .split("-")
+        .filter(Boolean)
+        .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" "),
+    ),
   );
 
   return {
-    id: String(first(slug, collection.id, collection.collection, c.id, collection.name, "unknown")),
-    name: String(first(collection.name, c.name, slug, "Unknown collection")),
+    id: slug,
     slug,
-    image: first(collection.image_url, collection.imageUrl, collection.image, c.image_url, c.imageUrl, c.image) || null,
-    floor: num(
-      first(
-        c.floor_price,
-        c.floorPrice,
-        c.floor?.price,
-        c.floor?.value,
-        stats.floor_price,
-        total.floor_price,
-        total.floorPrice,
-        oneDay.floor_price,
-        oneDay.floorPrice
-      )
+    name,
+    image:
+      firstDefined(
+        collection?.image_url,
+        collection?.imageUrl,
+        collection?.image,
+        row?.collection?.image_url,
+        row?.collection?.image,
+        row?.image_url,
+        row?.image,
+      ) || null,
+    floor: numberOrNull(
+      firstDefined(
+        total?.floor_price,
+        total?.floorPrice,
+        stats?.floor_price,
+        stats?.floorPrice,
+        rowTotal?.floor_price,
+        rowTotal?.floorPrice,
+        row?.floor_price,
+        row?.floorPrice,
+      ),
     ),
-    volume24h: num(
-      first(
-        c.one_day_volume,
-        c.volume_1d,
-        c.volume24h,
-        c.volume?.one_day,
-        c.volume?.oneDay,
-        oneDay.volume,
-        oneDay.total_volume
-      )
+    volume24h: numberOrNull(
+      firstDefined(
+        oneDay?.volume,
+        oneDay?.total_volume,
+        oneDay?.volume_eth,
+        rowOneDay?.volume,
+        row?.one_day_volume,
+        row?.volume_1d,
+        row?.volume24h,
+      ),
     ),
-    volume7d: num(
-      first(
-        c.seven_day_volume,
-        c.volume_7d,
-        c.volume7d,
-        c.volume?.seven_days,
-        c.volume?.sevenDays,
-        sevenDay.volume,
-        sevenDay.total_volume
-      )
+    volume7d: numberOrNull(
+      firstDefined(
+        sevenDay?.volume,
+        sevenDay?.total_volume,
+        rowSevenDay?.volume,
+        row?.seven_day_volume,
+        row?.volume_7d,
+        row?.volume7d,
+      ),
     ),
-    sales24h: num(
-      first(c.one_day_sales, c.sales_1d, c.sales24h, c.sales?.one_day, oneDay.sales, oneDay.sales_count)
+    sales24h: numberOrNull(
+      firstDefined(
+        oneDay?.sales,
+        oneDay?.sales_count,
+        rowOneDay?.sales,
+        row?.one_day_sales,
+        row?.sales_1d,
+        row?.sales24h,
+      ),
     ),
-    owners: num(first(c.num_owners, c.owner_count, c.owners, stats.num_owners, total.num_owners, total.numOwners)),
-    tokenCount: num(first(collection.total_supply, collection.totalSupply, c.total_supply, c.token_count, c.tokenCount)),
+    owners: numberOrNull(
+      firstDefined(
+        total?.num_owners,
+        total?.numOwners,
+        total?.owners,
+        rowTotal?.num_owners,
+        row?.num_owners,
+        row?.owner_count,
+      ),
+    ),
+    tokenCount: numberOrNull(
+      firstDefined(
+        collection?.total_supply,
+        collection?.totalSupply,
+        collection?.nfts_count,
+        row?.total_supply,
+        row?.token_count,
+      ),
+    ),
     chain: chainRaw.charAt(0).toUpperCase() + chainRaw.slice(1),
-    marketplaceUrl: slug ? `https://opensea.io/collection/${slug}` : null,
+    marketplaceUrl: `https://opensea.io/collection/${encodeURIComponent(slug)}`,
   };
 }
 
-async function request(path: string) {
-  const key = process.env.OPENSEA_API_KEY;
-  if (!key) return { ok: false, status: null, data: null as any, message: "OPENSEA_API_KEY is not configured." };
-
-  try {
-    const r = await fetch(`${API}${path}`, {
-      headers: { "X-API-KEY": key, accept: "application/json" },
-      cache: "no-store",
-      signal: AbortSignal.timeout(12000),
-    });
-    const text = await r.text();
-    let data: any = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = null;
-    }
-    if (!r.ok) {
-      const apiMessage = data?.detail || data?.message || data?.error || text.slice(0, 160) || `HTTP ${r.status}`;
-      return { ok: false, status: r.status, data, message: `OpenSea ${r.status}: ${String(apiMessage)}` };
-    }
-    return { ok: true, status: r.status, data, message: "Connected to OpenSea." };
-  } catch (error) {
-    return { ok: false, status: null, data: null, message: error instanceof Error ? error.message : "OpenSea request failed." };
-  }
-}
-
-function rows(d: any) {
-  if (!d) return [];
-  for (const key of [
-    "collections",
-    "collection_rankings",
-    "rankings",
-    "results",
-    "data",
-    "items",
-  ]) {
-    if (Array.isArray(d[key])) return d[key];
-  }
-  if (Array.isArray(d)) return d;
-  return [];
-}
-
-async function load() {
+export async function getNftCollections(): Promise<NftCollection[]> {
   if (!process.env.OPENSEA_API_KEY) return [];
-  const attempts = [
-    "/collections/trending?limit=30",
-    "/collections/trending?limit=30&timeframe=ONE_DAY",
-    "/collections/top?limit=30",
+
+  let seedRows: any[] = [];
+  const sources = [
+    "/collections/trending?limit=12&timeframe=ONE_DAY",
+    "/collections/top?limit=12",
   ];
 
-  for (const path of attempts) {
-    const result = await request(path);
-    if (!result.ok) continue;
-    const mapped = rows(result.data)
-      .map(mapCollection)
-      .filter((c: NftCollection) => c.slug && c.name);
-    if (mapped.length) return mapped;
+  for (const path of sources) {
+    try {
+      const payload = await openSea(path);
+      seedRows = rankingRows(payload);
+      if (seedRows.length > 0) break;
+    } catch {
+      // Try the next OpenSea ranking endpoint.
+    }
   }
-  return [];
+
+  if (seedRows.length === 0) return [];
+
+  const enriched = await Promise.all(
+    seedRows.slice(0, 12).map((row) => enrichCollection(row)),
+  );
+
+  return enriched.filter((item): item is NftCollection => Boolean(item));
 }
-
-export async function getNftApiHealth(): Promise<NftApiHealth> {
-  const configured = Boolean(process.env.OPENSEA_API_KEY);
-  if (!configured) {
-    return {
-      configured: false,
-      ok: false,
-      status: null,
-      endpoint: null,
-      message: "OPENSEA_API_KEY is not configured in this deployment.",
-      responseKeys: [],
-      rowCount: 0,
-    };
-  }
-
-  const endpoints = ["/collections/trending?limit=5", "/collections/top?limit=5"];
-  let last: NftApiHealth = {
-    configured: true,
-    ok: false,
-    status: null,
-    endpoint: null,
-    message: "No OpenSea endpoint returned usable data.",
-    responseKeys: [],
-    rowCount: 0,
-  };
-
-  for (const endpoint of endpoints) {
-    const result = await request(endpoint);
-    const responseKeys = result.data && typeof result.data === "object" ? Object.keys(result.data) : [];
-    const rowCount = rows(result.data).length;
-    last = {
-      configured: true,
-      ok: result.ok && rowCount > 0,
-      status: result.status,
-      endpoint,
-      message: result.ok
-        ? rowCount > 0
-          ? "OpenSea returned collection data."
-          : "OpenSea responded successfully, but the response shape contained no recognized collection rows."
-        : result.message,
-      responseKeys,
-      rowCount,
-    };
-    if (last.ok) return last;
-  }
-
-  return last;
-}
-
-export const getNftCollections = unstable_cache(load, ["nft-opensea-top-v2"], {
-  revalidate: 300,
-  tags: ["nft-market"],
-});
