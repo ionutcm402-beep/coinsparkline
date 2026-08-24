@@ -17,6 +17,7 @@ import "../styles/terminal-v1-phase8.css";
 import "../styles/terminal-v1-phase9.css";
 import "../styles/terminal-v1-phase10.css";
 import "../styles/terminal-v1-phase11.css";
+import "../styles/terminal-v1-phase13.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import PWARegister from "@/components/PWARegister";
