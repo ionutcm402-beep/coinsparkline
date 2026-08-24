@@ -23,7 +23,6 @@ export const metadata:Metadata={
  metadataBase:new URL(siteUrl),
  title:{default:"CoinSparkLine — Crypto market behaviour, interpreted",template:"%s | CoinSparkLine"},
  description,
- alternates:{canonical:"/"},
  manifest:"/manifest.webmanifest",
  applicationName:"CoinSparkLine",
  appleWebApp:{capable:true,title:"CoinSparkLine",statusBarStyle:"default"},
