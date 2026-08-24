@@ -8,6 +8,7 @@ import {getSparkScore} from "@/lib/sparkScore";
 import CurrencyAmount from "@/components/CurrencyAmount";
 import TerminalChat from "@/components/TerminalChat";
 import TerminalEventFeed from "@/components/TerminalEventFeed";
+import TerminalNftPulse from "@/components/TerminalNftPulse";
 
 type View="All"|"Moving"|"Building"|"Volatile";
 const stablecoins=new Set(["usdt","usdc","dai","busd","tusd","usdp"]);
@@ -42,5 +43,6 @@ export default function TerminalLive({coins,updatedLabel}:{coins:Coin[];updatedL
    <section className="terminal-panel terminal-regime-map"><header className="terminal-panel-head"><div><span className="terminal-eyebrow">Regime map</span><h2>Market structure</h2></div></header><div className="terminal-regime-bars">{[["Calm",calm,"calm"],["Building",building,"building"],["Awakening",awakening,"awakening"],["Volatile",volatile,"volatile"]].map(([label,value,key])=>{const count=Number(value);return <div key={String(label)}><div><span>{label}</span><strong>{count}</strong></div><div className="terminal-regime-track"><i data-regime={key} style={{width:`${Math.max(3,(count/Math.max(1,eligible.length))*100)}%`}}/></div></div>})}</div></section>
    <TerminalChat selectedSymbol={selected?.symbol} selectedScore={selected?getSparkScore(selected).score:null} selectedRegime={selected?tierLabel[getSignalTier(selected)]:null} selectedChange={selected?.change24hPct??null} onSelect={selectBySymbol}/>
   </div>
+  <div className="terminal-cross-market"><TerminalNftPulse/></div>
  </main>
 }
