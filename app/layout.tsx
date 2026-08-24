@@ -3,6 +3,7 @@ import "./globals.css";
 import "./csl2.css";
 import "../styles/design-system.css";
 import "../styles/ui-primitives.css";
+import "../styles/homepage.css";
 import FlowingLines from "@/components/FlowingLines";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
