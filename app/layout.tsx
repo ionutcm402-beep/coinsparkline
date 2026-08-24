@@ -9,6 +9,7 @@ import "../styles/homepage-phase4.css";
 import "../styles/live-page.css";
 import "../styles/discovery-pages.css";
 import "../styles/coin-detail-reference.css";
+import "../styles/personal-intelligence.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import CoinPageWatchlistDock from "@/components/CoinPageWatchlistDock";
