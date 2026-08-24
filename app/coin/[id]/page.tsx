@@ -15,6 +15,47 @@ export const revalidate = 1800;
 const STATE_LABEL = (s: number) => (s === 0 ? "Calm" : "Volatile");
 const STATE_COLOR = (s: number) => (s === 0 ? "text-emerald-600" : "text-rose-600");
 
+type WalletOption = { name: string; note: string; url: string };
+
+function walletOptions(id: string, platforms: string[], homepage?: string | null): WalletOption[] {
+  const has = (needle: string) => platforms.some((p) => p.toLowerCase().includes(needle));
+  if (id === "bitcoin") return [
+    { name: "Ledger", note: "Hardware wallet", url: "https://www.ledger.com/" },
+    { name: "Trezor", note: "Hardware wallet", url: "https://trezor.io/" },
+    { name: "Electrum", note: "Bitcoin desktop wallet", url: "https://electrum.org/" },
+  ];
+  if (id === "litecoin") return [
+    { name: "Ledger", note: "Hardware wallet", url: "https://www.ledger.com/" },
+    { name: "Trezor", note: "Hardware wallet", url: "https://trezor.io/" },
+  ];
+  if (id === "solana" || has("solana")) return [
+    { name: "Phantom", note: "Solana wallet", url: "https://phantom.com/" },
+    { name: "Solflare", note: "Solana wallet", url: "https://solflare.com/" },
+    { name: "Ledger", note: "Hardware wallet", url: "https://www.ledger.com/" },
+  ];
+  if (id === "cardano" || has("cardano")) return [
+    { name: "Lace", note: "Cardano wallet", url: "https://www.lace.io/" },
+    { name: "Eternl", note: "Cardano wallet", url: "https://eternl.io/" },
+    { name: "Ledger", note: "Hardware wallet", url: "https://www.ledger.com/" },
+  ];
+  if (id === "zcash") return [
+    { name: "Zashi", note: "Zcash wallet", url: "https://electriccoin.co/zashi/" },
+    { name: "YWallet", note: "Zcash wallet", url: "https://ywallet.app/" },
+  ];
+  if (id === "monero") return [
+    { name: "Monero GUI", note: "Official desktop wallet", url: "https://www.getmonero.org/downloads/" },
+    { name: "Feather", note: "Lightweight desktop wallet", url: "https://featherwallet.org/" },
+    { name: "Ledger", note: "Hardware wallet integration", url: "https://www.ledger.com/" },
+  ];
+  if (id === "ethereum" || has("ethereum")) return [
+    { name: "MetaMask", note: "EVM wallet", url: "https://metamask.io/" },
+    { name: "Rabby", note: "EVM wallet", url: "https://rabby.io/" },
+    { name: "Ledger", note: "Hardware wallet", url: "https://www.ledger.com/" },
+  ];
+  if (homepage) return [{ name: "Official wallet guidance", note: "Check the project website for supported wallets", url: homepage }];
+  return [];
+}
+
 function ExternalIcon() {
   return <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden="true"><path d="M7 13 13.5 6.5M9 6.5h4.5V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>;
 }
@@ -58,6 +99,7 @@ export default async function CoinDetailPage({ params }: { params: Promise<{ id:
   const ath = details?.ath;
   const circSupply = details?.circulatingSupply;
   const maxSupply = details?.maxSupply;
+  const wallets = walletOptions(id, details?.platforms || [], details?.homepage);
   const xQuery = encodeURIComponent(displayName);
   const youtubeQuery = encodeURIComponent(`${displayName} crypto`);
   const redditQuery = encodeURIComponent(`${displayName} crypto`);
@@ -98,6 +140,17 @@ export default async function CoinDetailPage({ params }: { params: Promise<{ id:
               <div className="rounded-2xl border border-blue-50 px-4 py-4"><p className="text-xs text-slate-400">All-time high</p><p className="mt-1 font-semibold text-slate-700"><CurrencyAmount usd={ath}/></p></div>
               <div className="rounded-2xl border border-blue-50 px-4 py-4"><p className="text-xs text-slate-400">Max supply</p><p className="mt-1 font-semibold text-slate-700">{maxSupply?formatCompactNumber(maxSupply):"No cap"}</p></div>
             </div>
+
+            {(details?.purchaseMarkets?.length || wallets.length) ? <section className="mt-10 grid gap-5 lg:grid-cols-2">
+              {details?.purchaseMarkets?.length ? <div className="rounded-[28px] border border-blue-100/70 bg-white/85 p-5 shadow-[0_18px_44px_rgba(59,130,246,.06)] sm:p-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-500">Where to buy</p><h2 className="mt-1 text-2xl font-bold">Markets for {symbol}</h2><p className="mt-2 text-sm text-slate-500">Top active markets reported by CoinGecko. Availability can vary by country.</p>
+                <div className="mt-5 space-y-2">{details.purchaseMarkets.map((m)=><div key={`${m.name}-${m.pair}`} className="flex items-center justify-between gap-3 rounded-2xl border border-blue-50 bg-blue-50/35 px-4 py-3"><div><p className="font-semibold text-slate-800">{m.name}</p><p className="text-xs text-slate-400">{m.pair}</p></div>{m.url?<a href={m.url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-blue-100 bg-white px-3 py-1.5 text-xs font-bold text-blue-600 hover:border-blue-200">Open ↗</a>:<span className="text-xs text-slate-400">Market</span>}</div>)}</div>
+              </div>:null}
+              {wallets.length ? <div className="rounded-[28px] border border-violet-100/70 bg-gradient-to-br from-white via-violet-50/35 to-blue-50/45 p-5 shadow-[0_18px_44px_rgba(99,102,241,.06)] sm:p-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-violet-500">Storage</p><h2 className="mt-1 text-2xl font-bold">Wallet options</h2><p className="mt-2 text-sm text-slate-500">Common wallet options for this coin or network. Always verify support before sending funds.</p>
+                <div className="mt-5 grid gap-2">{wallets.map((w)=><a key={w.name} href={w.url} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between rounded-2xl border border-violet-100/70 bg-white/80 px-4 py-3 hover:border-violet-200"><div><p className="font-semibold text-slate-800">{w.name}</p><p className="text-xs text-slate-400">{w.note}</p></div><span className="text-violet-500 transition-transform group-hover:translate-x-0.5">↗</span></a>)}</div>
+              </div>:null}
+            </section>:null}
 
             <section className="mt-10 rounded-[28px] border border-blue-100/70 bg-gradient-to-br from-blue-50/65 via-white to-violet-50/55 p-5 sm:p-7">
               <div className="text-center"><p className="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-500">Explore</p><h2 className="mt-1 text-2xl font-bold sm:text-3xl">Go deeper</h2><p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">Open trusted sources and live communities without losing the context of this signal.</p></div>
