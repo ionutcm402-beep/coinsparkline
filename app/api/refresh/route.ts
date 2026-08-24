@@ -10,15 +10,21 @@ export const maxDuration = 60;
 export async function GET(request: NextRequest) {
   const startedAt = Date.now();
   const authHeader = request.headers.get("authorization");
-  const querySecret = request.nextUrl.searchParams.get("secret");
-  const providedSecret = authHeader?.replace("Bearer ", "") || querySecret;
-  if (process.env.CRON_SECRET && providedSecret !== process.env.CRON_SECRET) {
+  const providedSecret = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const configuredSecret = process.env.CRON_SECRET;
+
+  // Never accept secrets in the URL. Query strings can leak into logs, analytics,
+  // browser history and third-party observability systems.
+  if (!configuredSecret) {
+    return NextResponse.json({ error: "Refresh endpoint is not configured" }, { status: 503 });
+  }
+  if (!providedSecret || providedSecret !== configuredSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const total = Math.max(30, Math.min(Number(request.nextUrl.searchParams.get("total") || 200), 200));
-    const batchSize = Math.max(10, Math.min(Number(request.nextUrl.searchParams.get("batch") || 30), 40));
+    const batchSize = Math.max(10, Math.min(Number(request.nextUrl.searchParams.get("batch") || 24), 30));
     const requestedOffset = Number(request.nextUrl.searchParams.get("offset") || 0);
     const offset = Math.max(0, Math.min(requestedOffset, Math.max(0, total - 1)));
     const days = Math.max(120, Math.min(Number(request.nextUrl.searchParams.get("days") || 365), 730));
@@ -41,7 +47,9 @@ export async function GET(request: NextRequest) {
     }
 
     const alreadyRefreshed = new Set(refreshed.map((coin) => coin.id));
-    const targetedIds = armedCoinIds.filter((id) => !alreadyRefreshed.has(id)).slice(0, 10);
+    // Keep targeted alert refreshes intentionally small so an unexpectedly large
+    // alert population cannot push the cron request into Vercel's hard timeout.
+    const targetedIds = armedCoinIds.filter((id) => !alreadyRefreshed.has(id)).slice(0, 5);
     const targeted = targetedIds.length ? await runScanForIds(total, days, targetedIds, apiKey) : [];
     const refreshedAll = [...refreshed, ...targeted];
 
