@@ -239,3 +239,33 @@ export async function getNftCollections(): Promise<NftCollection[]> {
 
   return enriched.filter((item): item is NftCollection => Boolean(item));
 }
+
+export async function getNftApiHealth() {
+  const configured = Boolean(process.env.OPENSEA_API_KEY);
+  if (!configured) {
+    return { configured: false, ok: false, status: 503, message: "OPENSEA_API_KEY is not configured." };
+  }
+
+  const endpoint = "/collections/trending?limit=5&timeframe=ONE_DAY";
+  try {
+    const payload = await openSea(endpoint);
+    const rows = rankingRows(payload);
+    return {
+      configured: true,
+      ok: rows.length > 0,
+      status: 200,
+      endpoint,
+      message: rows.length > 0 ? "OpenSea returned collection data." : "OpenSea responded but returned no collection rows.",
+      responseKeys: payload && typeof payload === "object" ? Object.keys(payload) : [],
+      rowCount: rows.length,
+    };
+  } catch (error) {
+    return {
+      configured: true,
+      ok: false,
+      status: 503,
+      endpoint,
+      message: error instanceof Error ? error.message : "OpenSea request failed.",
+    };
+  }
+}
