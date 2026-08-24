@@ -1,0 +1,189 @@
+"use client";
+
+import Link from "next/link";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
+import type { CoinMeta } from "@/lib/coingecko";
+
+type ChatMessage = {
+  id: string;
+  user_id: string;
+  display_name: string;
+  body: string;
+  coin_symbol: string | null;
+  created_at: string;
+};
+
+type Period = "24H" | "7D";
+type MarketFilter = "All" | "Top" | "Privacy";
+
+const privacy = new Set(["xmr", "zec", "firo", "dash", "scrt", "rose", "arrr"]);
+
+function money(n: number) {
+  if (n >= 1000) return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  if (n >= 1) return `$${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  return `$${n.toLocaleString(undefined, { maximumSignificantDigits: 4 })}`;
+}
+
+function initials(name: string) {
+  return name.trim().slice(0, 2).toUpperCase() || "CS";
+}
+
+export default function LiveMarketRoom({ coins }: { coins: CoinMeta[] }) {
+  const [period, setPeriod] = useState<Period>("24H");
+  const [marketFilter, setMarketFilter] = useState<MarketFilter>("All");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [body, setBody] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState("Guest");
+  const [chatReady, setChatReady] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const endRef = useRef<HTMLDivElement | null>(null);
+
+  const filtered = useMemo(() => {
+    let rows = coins.slice(0, 48);
+    if (marketFilter === "Top") rows = rows.slice(0, 20);
+    if (marketFilter === "Privacy") rows = rows.filter((coin) => privacy.has(coin.symbol.toLowerCase()));
+    return rows;
+  }, [coins, marketFilter]);
+
+  const biggestCap = Math.max(...filtered.map((coin) => coin.market_cap ?? 0), 1);
+  const marketChange = filtered.length
+    ? filtered.reduce((sum, coin) => sum + (coin.price_change_percentage_24h ?? 0), 0) / filtered.length
+    : 0;
+
+  useEffect(() => {
+    let mounted = true;
+    let channel: ReturnType<ReturnType<typeof getSupabaseBrowserClient>["channel"]> | null = null;
+    const supabase = getSupabaseBrowserClient();
+
+    async function boot() {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!mounted) return;
+      if (auth.user) {
+        setUserId(auth.user.id);
+        const meta = auth.user.user_metadata || {};
+        const name = meta.display_name || meta.full_name || auth.user.email?.split("@")[0] || "Member";
+        setDisplayName(String(name));
+      }
+
+      const { data, error } = await supabase
+        .from("community_messages")
+        .select("id,user_id,display_name,body,coin_symbol,created_at")
+        .order("created_at", { ascending: true })
+        .limit(80);
+
+      if (!mounted) return;
+      if (error) {
+        setChatError("Community chat needs its database table activated.");
+        setChatReady(true);
+        return;
+      }
+
+      setMessages((data || []) as ChatMessage[]);
+      setChatReady(true);
+
+      channel = supabase
+        .channel("coinspark-live-chat")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "community_messages" },
+          (payload) => setMessages((current) => [...current.slice(-79), payload.new as ChatMessage]),
+        )
+        .subscribe();
+    }
+
+    boot();
+    return () => {
+      mounted = false;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [messages.length]);
+
+  async function sendMessage(event: FormEvent) {
+    event.preventDefault();
+    const text = body.trim();
+    if (!text || !userId || sending) return;
+    setSending(true);
+    setChatError(null);
+    const symbol = text.match(/\$([A-Za-z0-9]{2,10})/)?.[1]?.toUpperCase() || selected?.toUpperCase() || null;
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase.from("community_messages").insert({
+      user_id: userId,
+      display_name: displayName.slice(0, 40),
+      body: text.slice(0, 500),
+      coin_symbol: symbol,
+    });
+    if (error) setChatError("Message could not be sent. Please try again.");
+    else setBody("");
+    setSending(false);
+  }
+
+  return (
+    <div className="grid min-h-[690px] gap-4 xl:grid-cols-[1.55fr_.85fr]">
+      <section className="overflow-hidden rounded-[30px] border border-slate-100 bg-white shadow-sm">
+        <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500"/><span className="text-[10px] font-black uppercase tracking-[.16em] text-emerald-600">Live market universe</span></div>
+              <h2 className="mt-1 text-xl font-black text-slate-950">Watch the whole market breathe.</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(["All","Top","Privacy"] as MarketFilter[]).map((item)=><button key={item} onClick={()=>setMarketFilter(item)} className={`rounded-full px-3.5 py-2 text-[10px] font-black transition ${marketFilter===item?"bg-slate-950 text-white":"bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>{item}</button>)}
+              {(["24H","7D"] as Period[]).map((item)=><button key={item} onClick={()=>setPeriod(item)} className={`rounded-full px-3.5 py-2 text-[10px] font-black transition ${period===item?"bg-blue-600 text-white":"bg-blue-50 text-blue-600"}`}>{item}</button>)}
+            </div>
+          </div>
+        </div>
+
+        <div className="relative min-h-[520px] overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,.12),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(124,58,237,.12),_transparent_32%),linear-gradient(180deg,#fbfdff,#f7faff)] p-4 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-[10px] font-bold text-slate-400"><span>{filtered.length} assets visible</span><span>Average move <b className={marketChange>=0?"text-emerald-600":"text-rose-600"}>{marketChange>=0?"+":""}{marketChange.toFixed(2)}%</b></span></div>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+            {filtered.map((coin,index)=>{
+              const change = coin.price_change_percentage_24h ?? 0;
+              const positive = change >= 0;
+              const capRatio = Math.sqrt((coin.market_cap ?? 0) / biggestCap);
+              const scale = 0.86 + Math.min(0.2, capRatio * 0.2);
+              const active = selected === coin.symbol.toLowerCase();
+              return <button key={coin.id} onClick={()=>setSelected(active?null:coin.symbol.toLowerCase())} style={{transform:`scale(${scale})`, animationDelay:`${(index%8)*90}ms`}} className={`group relative aspect-square min-h-[86px] rounded-full border p-2 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg ${active?"border-blue-400 bg-blue-600 text-white ring-4 ring-blue-100":positive?"border-emerald-100 bg-emerald-50/90 text-slate-900":"border-rose-100 bg-rose-50/90 text-slate-900"}`}>
+                <div className="absolute inset-1 rounded-full border border-white/70"/>
+                <div className="relative flex h-full flex-col items-center justify-center">
+                  <img src={coin.image} alt="" className="mb-1 h-6 w-6 rounded-full shadow-sm"/>
+                  <strong className="text-[11px] font-black">{coin.symbol.toUpperCase()}</strong>
+                  <span className={`mt-0.5 text-[9px] font-black ${active?"text-white":positive?"text-emerald-600":"text-rose-600"}`}>{positive?"+":""}{change.toFixed(1)}%</span>
+                  <span className={`mt-0.5 max-w-full truncate text-[8px] ${active?"text-blue-100":"text-slate-400"}`}>{money(coin.current_price)}</span>
+                </div>
+              </button>;
+            })}
+          </div>
+          {selected && <div className="sticky bottom-3 mx-auto mt-4 flex max-w-md items-center justify-between rounded-full border border-blue-100 bg-white/95 px-4 py-2.5 text-xs shadow-xl backdrop-blur"><span className="font-bold text-slate-700">${selected.toUpperCase()} selected for chat</span><Link href={`/coin/${coins.find(c=>c.symbol.toLowerCase()===selected)?.id||""}`} className="font-black text-blue-600">Open coin →</Link></div>}
+        </div>
+      </section>
+
+      <section className="flex min-h-[690px] flex-col overflow-hidden rounded-[30px] border border-slate-100 bg-white shadow-sm">
+        <div className="border-b border-slate-100 px-5 py-4"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-blue-500">CoinSpark Live</p><h2 className="mt-1 text-xl font-black text-slate-950">Community chat</h2></div><span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-black text-emerald-700">REAL TIME</span></div><p className="mt-2 text-xs leading-5 text-slate-400">Talk about the market while you watch it move. Use tags like <b className="text-slate-600">$BTC</b> or <b className="text-slate-600">$ZEC</b>.</p></div>
+
+        <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50/55 p-4">
+          {!chatReady && <div className="rounded-2xl bg-white p-4 text-center text-xs font-bold text-slate-400">Connecting to community…</div>}
+          {chatReady && messages.length===0 && !chatError && <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center"><p className="font-black text-slate-800">The room is open.</p><p className="mt-1 text-xs text-slate-400">Be the first person to start the conversation.</p></div>}
+          {messages.map((message)=>{
+            const mine=message.user_id===userId;
+            return <div key={message.id} className={`flex gap-2.5 ${mine?"flex-row-reverse":""}`}><div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[9px] font-black ${mine?"bg-blue-600 text-white":"bg-white text-slate-600 shadow-sm"}`}>{initials(message.display_name)}</div><div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 shadow-sm ${mine?"bg-blue-600 text-white":"bg-white text-slate-700"}`}><div className={`mb-1 flex items-center gap-2 text-[9px] font-bold ${mine?"text-blue-100":"text-slate-400"}`}><span>{message.display_name}</span>{message.coin_symbol&&<button onClick={()=>setSelected(message.coin_symbol!.toLowerCase())} className={`rounded-full px-2 py-0.5 font-black ${mine?"bg-white/15 text-white":"bg-blue-50 text-blue-600"}`}>${message.coin_symbol}</button>}</div><p className="break-words text-xs leading-5">{message.body}</p></div></div>;
+          })}
+          <div ref={endRef}/>
+        </div>
+
+        <div className="border-t border-slate-100 p-4">
+          {chatError && <div className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700">{chatError}</div>}
+          {userId ? <form onSubmit={sendMessage} className="flex items-end gap-2"><textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={500} rows={2} placeholder={selected?`Message the room about $${selected.toUpperCase()}…`:"Write a message…"} className="min-h-[48px] flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs outline-none focus:border-blue-400"/><button disabled={!body.trim()||sending} className="csl-btn-primary h-12 px-4 disabled:opacity-40">{sending?"…":"Send"}</button></form>:<div className="rounded-2xl bg-slate-50 p-4 text-center"><p className="text-xs font-bold text-slate-600">Sign in to join the conversation.</p><div className="mt-3 flex justify-center gap-2"><Link href="/signin" className="csl-btn-soft">Sign in</Link><Link href="/signup" className="csl-btn-primary">Create account</Link></div></div>}
+          <p className="mt-2 text-center text-[9px] text-slate-400">Public room · no financial advice · report abuse rather than engaging.</p>
+        </div>
+      </section>
+    </div>
+  );
+}
