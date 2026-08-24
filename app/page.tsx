@@ -5,7 +5,9 @@ import {getLatestScan} from "@/lib/blobStorage";
 import {mockCoins} from "@/lib/mockData";
 import {formatRelativeTime} from "@/lib/relativeTime";
 import {getDataFreshness} from "@/lib/dataFreshness";
+import {routeMetadata} from "@/lib/seo";
 
+export const metadata=routeMetadata("Crypto market behaviour, interpreted","CoinSparkLine interprets changes in crypto market behaviour with SparkScore, regime intelligence and research tools.","/");
 export const revalidate=300;
 
 export default async function Home(){
