@@ -5,11 +5,13 @@ import { Coin } from "@/types/coin";
 
 type CoinMeta = Awaited<ReturnType<typeof fetchTopCoins>>[number];
 
-const SCAN_CONCURRENCY = 3;
+const SCAN_CONCURRENCY = 4;
 
 async function scanOne(meta: CoinMeta, days: number, apiKey?: string): Promise<Coin | null> {
   try {
-    const history = await fetchPriceHistory(meta.id, days, apiKey);
+    // Scheduled scans favour bounded latency over long retry chains. A missed asset
+    // is retried by the next rolling refresh instead of holding the whole job open.
+    const history = await fetchPriceHistory(meta.id, days, apiKey, 0);
     const fit = fitRegime(history.map((h) => ({ date: h.date, close: h.close })));
     if (!fit) return null;
     return {
@@ -36,8 +38,6 @@ async function scanOne(meta: CoinMeta, days: number, apiKey?: string): Promise<C
 async function scanMetaList(metaList: CoinMeta[], days: number, apiKey?: string): Promise<Coin[]> {
   if (!metaList.length) return [];
 
-  // A small worker pool cuts the refresh duration substantially without firing
-  // an unbounded burst of CoinGecko history requests that could trigger rate limits.
   const results: Array<Coin | null> = new Array(metaList.length).fill(null);
   let cursor = 0;
   const workerCount = Math.min(SCAN_CONCURRENCY, metaList.length);
