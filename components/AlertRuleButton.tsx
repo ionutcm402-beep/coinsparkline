@@ -1,4 +1,5 @@
 "use client";
+// CoinSparkLine Step 4: unified signal, price and behaviour alerts.
 import {useEffect,useState} from "react";
 import {createPortal} from "react-dom";
 import {getSupabaseBrowserClient} from "@/lib/supabaseClient";
