@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="csl-global-loading" role="status" aria-live="polite" aria-label="Loading CoinSparkLine"><div className="csl-global-loading__line"/><div className="csl-global-loading__line"/><div className="csl-global-loading__line"/><span className="sr-only">Loading…</span></div>}
