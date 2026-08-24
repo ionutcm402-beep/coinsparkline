@@ -1,6 +1,7 @@
 import type {Metadata,Viewport} from "next";
 import "./globals.css";
 import "../styles/clean-2030.css";
+import "../styles/coin-profile-2030.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import PWARegister from "@/components/PWARegister";
