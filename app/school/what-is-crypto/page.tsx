@@ -1,6 +1,4 @@
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import SchoolLessonOne from "@/components/SchoolLessonOne";
-
-export default function WhatIsCryptoPage() {
-  return <div className="min-h-screen bg-[#fbfcff] text-slate-950"><Header /><main className="mx-auto max-w-4xl px-5 pb-20 pt-9 sm:px-8"><SchoolLessonOne /></main></div>;
-}
+export default function WhatIsCryptoPage(){return <div className="csl-trust-page"><Header/><main className="mx-auto w-[min(860px,calc(100%-32px))] px-4 pb-20 pt-10 sm:px-0"><SchoolLessonOne/></main><Footer/></div>}
