@@ -17,8 +17,9 @@ function eventFor(rule:Rule,current:Coin,previous?:Coin){
 }
 
 async function sendEmail(to:string,title:string,body:string,coinId:string){
-  const apiKey=process.env.RESEND_API_KEY,from=process.env.ALERT_FROM_EMAIL;
-  if(!apiKey||!from)return false;
+  const apiKey=process.env.RESEND_API_KEY;
+  const from=process.env.ALERT_FROM_EMAIL||"CoinSparkLine Alerts <alerts@coinsparkline.com>";
+  if(!apiKey)return false;
   const site=process.env.NEXT_PUBLIC_SITE_URL||"https://coinsparkline.vercel.app";
   const resp=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({from,to,subject:`CoinSparkLine: ${title}`,html:`<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto\"><h2>${title}</h2><p>${body}</p><p><a href=\"${site}/coin/${coinId}\">Open CoinSparkLine analysis</a></p><hr/><p style=\"font-size:12px;color:#667085\">Signal alert only. Not financial advice.</p></div>`})});
   return resp.ok;
