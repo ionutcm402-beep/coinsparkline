@@ -1,0 +1,39 @@
+@media (max-width: 639px) {
+  /* Spark Radar: turn the four modes into a clean 2-column control deck. */
+  main > div.grid > div.space-y-3 > section:first-child > div:first-child {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  main > div.grid > div.space-y-3 > section:first-child > div:first-child > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    width: 100%;
+  }
+
+  main > div.grid > div.space-y-3 > section:first-child > div:first-child > div:last-child > button {
+    min-height: 42px;
+    width: 100%;
+    padding: 0.6rem 0.65rem;
+    border-radius: 0.8rem;
+    font-size: 10px;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  /* Discovery: filters and sorting should read as two deliberate rows, not a squeezed toolbar. */
+  main > div.grid > div.space-y-3 > section:nth-child(2) > div:first-child {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  main > div.grid > div.space-y-3 > section:nth-child(2) > div:first-child > div:last-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
+    width: 100%;
+  }
+}
