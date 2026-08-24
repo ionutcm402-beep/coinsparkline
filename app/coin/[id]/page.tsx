@@ -28,6 +28,7 @@ export default async function CoinDetailPage({params}:{params:Promise<{id:string
   const category=coinCategory(id);
   const calm=fit.currentState===0;
   const mood:"Calm"|"Volatile"=calm?"Calm":"Volatile";
+  const moodKey=mood.toLowerCase();
   const displayName=id.charAt(0).toUpperCase()+id.slice(1).replace(/-/g," ");
   const symbol=details?.symbol||id.slice(0,5).toUpperCase();
   const chartPoints=fit.dates.map((date,i)=>({date,close:fit.closes[i],state:fit.hiddenStates[i]}));
@@ -61,7 +62,7 @@ export default async function CoinDetailPage({params}:{params:Promise<{id:string
         <p className="cs-coin-reading-label">What is happening now</p>
         <div className="cs-coin-reading-top">
           <div><div className="cs-coin-reading-score">{sparkScore}<small>/100</small></div><span className="cs-coin-symbol">SparkScore</span></div>
-          <div className="cs-coin-reading-state"><strong>{mood}</strong><span>{confidence}% model confidence</span></div>
+          <div className="cs-coin-reading-state" data-regime={moodKey}><strong>{mood}</strong><span>{confidence}% model confidence</span></div>
         </div>
         <p className="cs-coin-reading-copy">{interpretation}</p>
       </aside>
