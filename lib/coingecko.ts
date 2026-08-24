@@ -76,6 +76,12 @@ export async function fetchPriceHistory(
   return prices.map(([ts, close]) => ({ date: new Date(ts).toISOString(), close }));
 }
 
+export interface PurchaseMarket {
+  name: string;
+  pair: string;
+  url: string | null;
+}
+
 export interface CoinDetails {
   symbol: string;
   description: string;
@@ -88,13 +94,15 @@ export interface CoinDetails {
   circulatingSupply: number | null;
   totalSupply: number | null;
   maxSupply: number | null;
+  platforms: string[];
+  purchaseMarkets: PurchaseMarket[];
 }
 
 export async function fetchCoinDetails(coinId: string, apiKey?: string): Promise<CoinDetails | null> {
   try {
     const params = new URLSearchParams({
       localization: "false",
-      tickers: "false",
+      tickers: "true",
       community_data: "false",
       developer_data: "false",
       sparkline: "false",
@@ -111,6 +119,25 @@ export async function fetchCoinDetails(coinId: string, apiKey?: string): Promise
     const homepageList: string[] = data.links?.homepage || [];
     const homepage = homepageList.find((h) => h) || null;
 
+    const tickerRows = Array.isArray(data.tickers) ? data.tickers : [];
+    const seenMarkets = new Set<string>();
+    const purchaseMarkets: PurchaseMarket[] = tickerRows
+      .filter((t: any) => !t?.is_anomaly && !t?.is_stale && t?.market?.name)
+      .sort((a: any, b: any) => (b?.converted_volume?.usd || 0) - (a?.converted_volume?.usd || 0))
+      .reduce((acc: PurchaseMarket[], t: any) => {
+        const name = String(t.market.name);
+        if (seenMarkets.has(name) || acc.length >= 6) return acc;
+        seenMarkets.add(name);
+        acc.push({
+          name,
+          pair: `${String(t.base || data.symbol || "").toUpperCase()}/${String(t.target || "").toUpperCase()}`,
+          url: typeof t.trade_url === "string" && t.trade_url.startsWith("http") ? t.trade_url : null,
+        });
+        return acc;
+      }, []);
+
+    const platforms = Object.keys(data.platforms || {}).filter((p) => p && p !== "native");
+
     return {
       symbol: (data.symbol || coinId.slice(0, 5)).toUpperCase(),
       description,
@@ -123,6 +150,8 @@ export async function fetchCoinDetails(coinId: string, apiKey?: string): Promise
       circulatingSupply: md.circulating_supply ?? null,
       totalSupply: md.total_supply ?? null,
       maxSupply: md.max_supply ?? null,
+      platforms,
+      purchaseMarkets,
     };
   } catch {
     return null;
