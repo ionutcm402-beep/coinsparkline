@@ -1,64 +1,18 @@
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import HomeClient from "@/components/HomeClient";
-import ChangeSummary from "@/components/ChangeSummary";
+import HomeV2 from "@/components/HomeV2";
 import Footer from "@/components/Footer";
-import DataFreshnessStrip from "@/components/DataFreshnessStrip";
-import { getLatestScan, getPreviousScan } from "@/lib/blobStorage";
-import { mockCoins, categories } from "@/lib/mockData";
-import { formatRelativeTime } from "@/lib/relativeTime";
-import { getDataFreshness } from "@/lib/dataFreshness";
-import { fetchTopCoins } from "@/lib/coingecko";
+import {getLatestScan} from "@/lib/blobStorage";
+import {mockCoins} from "@/lib/mockData";
+import {formatRelativeTime} from "@/lib/relativeTime";
+import {getDataFreshness} from "@/lib/dataFreshness";
 
-export const revalidate = 300;
+export const revalidate=300;
 
-export default async function Home() {
-  const [snapshot, previousSnapshot] = await Promise.all([getLatestScan(), getPreviousScan()]);
-  const coins = snapshot && snapshot.coins.length > 0 ? snapshot.coins : mockCoins;
-  const freshness = getDataFreshness(snapshot?.scannedAt);
-  let marketCoins = [] as Awaited<ReturnType<typeof fetchTopCoins>>;
-  try { marketCoins = await fetchTopCoins(200, process.env.COINGECKO_API_KEY); } catch { marketCoins = []; }
-  const relative = snapshot ? formatRelativeTime(snapshot.scannedAt) : undefined;
-  const statusLabel = relative ? `${freshness.label} · ${relative}` : freshness.label;
-  return <div className="flex-1 home-page-scale">
-    <Header/>
-    <Hero coins={coins}/>
-    <div className="home-dashboard-scale">
-      <DataFreshnessStrip freshness={freshness}/>
-      <ChangeSummary coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt}/>
-      <div className="home-client-wrap"><HomeClient coins={coins} previousCoins={previousSnapshot?.coins ?? []} previousScannedAt={previousSnapshot?.scannedAt} marketCoins={marketCoins} categories={categories} updatedLabel={statusLabel}/></div>
-    </div>
-    <style>{`
-      .home-client-wrap > main > section:nth-of-type(1),
-      .home-client-wrap > main > section:nth-of-type(3),
-      .home-client-wrap > main > div:last-child > aside > section:last-child{display:none}
-      @media (min-width: 900px){
-        .home-page-scale{
-          width:89.3%;
-          margin-inline:auto;
-          zoom:1.12;
-        }
-        .home-dashboard-scale{
-          width:92.6%;
-          margin-inline:auto;
-          zoom:1.08;
-        }
-        .home-client-wrap main{
-          padding-top:1.25rem;
-          padding-bottom:2rem;
-        }
-      }
-      @media (min-width: 1500px){
-        .home-page-scale{
-          width:87.7%;
-          zoom:1.14;
-        }
-        .home-dashboard-scale{
-          width:91%;
-          zoom:1.10;
-        }
-      }
-    `}</style>
-    <Footer/>
-  </div>;
+export default async function Home(){
+ const snapshot=await getLatestScan();
+ const coins=snapshot&&snapshot.coins.length>0?snapshot.coins:mockCoins;
+ const freshness=getDataFreshness(snapshot?.scannedAt);
+ const relative=snapshot?formatRelativeTime(snapshot.scannedAt):undefined;
+ const statusLabel=relative?`${freshness.label} · ${relative}`:freshness.label;
+ return <div className="flex-1"><Header/><HomeV2 coins={coins} updatedLabel={statusLabel}/><Footer/></div>;
 }
