@@ -18,12 +18,13 @@ import "../styles/terminal-v1-phase9.css";
 import "../styles/terminal-v1-phase10.css";
 import "../styles/terminal-v1-phase11.css";
 import "../styles/terminal-v1-phase13.css";
+import "../styles/simple-live.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import PWARegister from "@/components/PWARegister";
 const rawSiteUrl=process.env.NEXT_PUBLIC_SITE_URL||"https://coinsparkline.vercel.app";
 const siteUrl=rawSiteUrl.replace(/\/$/,"");
-const description="CoinSparkLine interprets changes in crypto market behaviour with SparkScore, regime intelligence and research tools.";
-export const metadata:Metadata={metadataBase:new URL(siteUrl),alternates:{canonical:"/"},title:{default:"CoinSparkLine — Crypto market behaviour, interpreted",template:"%s | CoinSparkLine"},description,manifest:"/manifest.webmanifest",applicationName:"CoinSparkLine",appleWebApp:{capable:true,title:"CoinSparkLine",statusBarStyle:"default"},icons:{icon:"/icon.svg",apple:"/pwa-icon.svg"},openGraph:{type:"website",siteName:"CoinSparkLine",url:siteUrl,title:"CoinSparkLine — Crypto market behaviour, interpreted",description,images:[{url:"/opengraph-image",width:1200,height:630,alt:"CoinSparkLine market intelligence"}]},twitter:{card:"summary_large_image",title:"CoinSparkLine — Crypto market behaviour, interpreted",description,images:["/opengraph-image"]},formatDetection:{telephone:false}};
+const description="CoinSparkLine surfaces behavioural changes in crypto and NFT markets with SparkScore and live activity signals.";
+export const metadata:Metadata={metadataBase:new URL(siteUrl),alternates:{canonical:"/"},title:{default:"CoinSparkLine — Crypto & NFT behavioural intelligence",template:"%s | CoinSparkLine"},description,manifest:"/manifest.webmanifest",applicationName:"CoinSparkLine",appleWebApp:{capable:true,title:"CoinSparkLine",statusBarStyle:"default"},icons:{icon:"/icon.svg",apple:"/pwa-icon.svg"},openGraph:{type:"website",siteName:"CoinSparkLine",url:siteUrl,title:"CoinSparkLine — Crypto & NFT behavioural intelligence",description,images:[{url:"/opengraph-image",width:1200,height:630,alt:"CoinSparkLine market intelligence"}]},twitter:{card:"summary_large_image",title:"CoinSparkLine — Crypto & NFT behavioural intelligence",description,images:["/opengraph-image"]},formatDetection:{telephone:false}};
 export const viewport:Viewport={themeColor:"#071018",width:"device-width",initialScale:1,viewportFit:"cover"};
 export default function RootLayout({children}:LayoutProps<"/">){return <html lang="en" className="h-full"><body id="top" className="csl-app min-h-full flex flex-col antialiased"><CurrencyProvider>{children}<PWARegister/><CookieConsent/></CurrencyProvider></body></html>}
