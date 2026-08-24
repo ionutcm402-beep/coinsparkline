@@ -11,6 +11,7 @@ import "../styles/discovery-pages.css";
 import "../styles/coin-detail-reference.css";
 import "../styles/personal-intelligence.css";
 import "../styles/secondary-discovery.css";
+import "../styles/trust-pages.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import CoinPageWatchlistDock from "@/components/CoinPageWatchlistDock";
