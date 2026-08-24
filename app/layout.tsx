@@ -1,29 +1,12 @@
 import type {Metadata,Viewport} from "next";
 import "./globals.css";
-import "../styles/design-system.css";
-import "../styles/ui-primitives.css";
-import "../styles/app-shell.css";
-import "../styles/homepage-phase4.css";
-import "../styles/live-page.css";
-import "../styles/discovery-pages.css";
-import "../styles/coin-detail-reference.css";
-import "../styles/personal-intelligence.css";
-import "../styles/secondary-discovery.css";
-import "../styles/trust-pages.css";
-import "../styles/accessibility.css";
-import "../styles/terminal-live.css";
-import "../styles/terminal-v1-next.css";
-import "../styles/terminal-v1-phase8.css";
-import "../styles/terminal-v1-phase9.css";
-import "../styles/terminal-v1-phase10.css";
-import "../styles/terminal-v1-phase11.css";
-import "../styles/terminal-v1-phase13.css";
+import "../styles/clean-2030.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import PWARegister from "@/components/PWARegister";
 const rawSiteUrl=process.env.NEXT_PUBLIC_SITE_URL||"https://coinsparkline.vercel.app";
 const siteUrl=rawSiteUrl.replace(/\/$/,"");
-const description="CoinSparkLine interprets changes in crypto market behaviour with SparkScore, regime intelligence and research tools.";
-export const metadata:Metadata={metadataBase:new URL(siteUrl),alternates:{canonical:"/"},title:{default:"CoinSparkLine — Crypto market behaviour, interpreted",template:"%s | CoinSparkLine"},description,manifest:"/manifest.webmanifest",applicationName:"CoinSparkLine",appleWebApp:{capable:true,title:"CoinSparkLine",statusBarStyle:"default"},icons:{icon:"/icon.svg",apple:"/pwa-icon.svg"},openGraph:{type:"website",siteName:"CoinSparkLine",url:siteUrl,title:"CoinSparkLine — Crypto market behaviour, interpreted",description,images:[{url:"/opengraph-image",width:1200,height:630,alt:"CoinSparkLine market intelligence"}]},twitter:{card:"summary_large_image",title:"CoinSparkLine — Crypto market behaviour, interpreted",description,images:["/opengraph-image"]},formatDetection:{telephone:false}};
-export const viewport:Viewport={themeColor:"#071018",width:"device-width",initialScale:1,viewportFit:"cover"};
-export default function RootLayout({children}:LayoutProps<"/">){return <html lang="en" className="h-full"><body id="top" className="csl-app min-h-full flex flex-col antialiased"><CurrencyProvider>{children}<PWARegister/><CookieConsent/></CurrencyProvider></body></html>}
+const description="CoinSparkLine shows crypto and NFT market movement through separate signal systems.";
+export const metadata:Metadata={metadataBase:new URL(siteUrl),title:{default:"CoinSparkLine — Crypto & NFT movement",template:"%s | CoinSparkLine"},description,manifest:"/manifest.webmanifest",applicationName:"CoinSparkLine",icons:{icon:"/icon.svg",apple:"/pwa-icon.svg"},openGraph:{type:"website",siteName:"CoinSparkLine",url:siteUrl,title:"CoinSparkLine — Crypto & NFT movement",description,images:[{url:"/opengraph-image",width:1200,height:630,alt:"CoinSparkLine"}]},twitter:{card:"summary_large_image",title:"CoinSparkLine — Crypto & NFT movement",description,images:["/opengraph-image"]},formatDetection:{telephone:false}};
+export const viewport:Viewport={themeColor:"#f5f7fb",width:"device-width",initialScale:1,viewportFit:"cover"};
+export default function RootLayout({children}:LayoutProps<"/">){return <html lang="en"><body><CurrencyProvider>{children}<PWARegister/><CookieConsent/></CurrencyProvider></body></html>}
