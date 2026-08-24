@@ -10,21 +10,36 @@ This phase is intentionally structural. It does not redesign product pages.
 - Targeted alert refresh work is capped per invocation to protect the Vercel 60-second ceiling.
 - Global security headers are defined in `next.config.ts`, including CSP, frame protection, referrer policy, content-type protection and permissions policy.
 - `/watchlist` is the canonical watchlist route. `/app/watchlist` is retained only as a permanent redirect for backwards compatibility.
+- `/privacy` is the legal Privacy Policy; `/privacy-coins` is the privacy-coin research product.
+- Screener and Opportunity Radar remain separate products: user-defined filtering versus automatic research prioritisation.
+- Authenticated API routes use the shared `apiError` / `apiSuccess` response pattern.
+- Alert-test delivery is rate limited to three attempts per ten minutes per user.
+- Community chat posting is rate limited in Postgres to five messages per ten seconds and thirty per five minutes.
+- Data API grants for chat and alert tables have been reduced to least privilege.
 
-## Product-route decisions
+## Live verification completed
 
-- `/privacy` is the legal Privacy Policy.
-- `/privacy-coins` is the privacy-coin research product. They are intentionally separate and should be labelled distinctly in navigation.
-- Screener and Opportunity Radar remain separate products: the Screener is user-defined filtering; Opportunity Radar is automatic research prioritisation.
+Verified against the production Supabase project on 2026-08-24:
 
-## Live verification required before phase sign-off
+- RLS is enabled on `community_messages`, `alert_rules` and `alert_events`.
+- Ownership policies are active in the live database.
+- Anonymous users only receive the intended read access to community chat.
+- Alert tables are restricted to authenticated users and owner-scoped RLS.
+- The database-side chat rate-limit trigger is installed.
+- `alert_test_requests` is server-only and has RLS enabled with no public policies.
 
-Repository SQL enables RLS for community chat and alert tables, but repository files alone cannot prove those policies are applied to the live Supabase project. Verify the live database before final production sign-off.
+Verified against Vercel production on 2026-08-24:
 
-Environment values must also be verified in Vercel without exposing secret contents. Expected server-only values include `SUPABASE_SECRET_KEY`, `COINGECKO_API_KEY`, `CRON_SECRET` and `RESEND_API_KEY`. Public Supabase URL/publishable key are intentionally client-visible.
+- The Phase 1 production deployment reached READY state.
+- Recent `/api/refresh` executions returned HTTP 200.
+- No grouped production runtime errors were reported during the verification window.
 
-## Deferred to later phases
+## Non-blocking security recommendation
 
-- Full route-by-route API rate limiting. Direct Supabase chat writes require a database-side rate-limit strategy rather than an unreliable per-instance memory limiter.
-- Legacy CSS/component deletion. Old styles remain necessary until every product page has migrated to the permanent design system.
-- SEO/PWA completion, sitemap, robots, structured data and branded 404 belong to the production-completeness phase.
+Supabase Security Advisor reports leaked-password protection as disabled. Supabase documents this feature as available on Pro plans and above. Enable it when the project plan supports it; it is not treated as a Phase 1 code gate.
+
+## Deferred intentionally
+
+- Legacy CSS/component deletion remains Phase 13 because old styles are still required by unmigrated pages.
+- SEO/PWA completion, sitemap, robots, structured data and branded 404 remain in Phase 12.
+- Broader performance and accessibility work remain in their dedicated phases.
