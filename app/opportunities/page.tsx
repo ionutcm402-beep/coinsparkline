@@ -11,5 +11,5 @@ export default async function OpportunitiesPage(){
  const snapshot=await getLatestScan();
  const coins=snapshot&&snapshot.coins.length?snapshot.coins:mockCoins;
  const updatedLabel=snapshot?.scannedAt?`Updated ${formatRelativeTime(snapshot.scannedAt)}`:"Latest available snapshot";
- return <div className="min-h-screen"><Header/><OpportunityRadar coins={coins} updatedLabel={updatedLabel}/><Footer/></div>;
+ return <div className="csl2-page"><Header coins={coins}/><OpportunityRadar coins={coins} updatedLabel={updatedLabel}/><Footer/></div>;
 }
