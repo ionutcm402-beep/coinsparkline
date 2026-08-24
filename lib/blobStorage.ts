@@ -1,4 +1,5 @@
 import { put, list } from "@vercel/blob";
+import { unstable_cache } from "next/cache";
 import { Coin } from "@/types/coin";
 
 const BLOB_PATHNAME = "latest-scan.json";
@@ -23,10 +24,21 @@ async function readSnapshot(pathname: string): Promise<ScanSnapshot | null> {
   }
 }
 
+const readLatestCached = unstable_cache(
+  () => readSnapshot(BLOB_PATHNAME),
+  ["latest-scan-snapshot"],
+  { revalidate: 60, tags: ["scan-snapshot"] }
+);
+
+const readPreviousCached = unstable_cache(
+  () => readSnapshot(PREVIOUS_BLOB_PATHNAME),
+  ["previous-scan-snapshot"],
+  { revalidate: 60, tags: ["scan-snapshot"] }
+);
+
 export async function saveScanSnapshot(snapshot: ScanSnapshot): Promise<void> {
-  // Preserve the snapshot that was live immediately before this refresh. This
-  // gives the homepage a genuine previous-vs-current comparison instead of
-  // trying to infer "today" changes from streak length alone.
+  // Writes must always read the live blob rather than the cached public snapshot,
+  // otherwise a refresh could preserve stale data as the "previous" snapshot.
   const current = await readSnapshot(BLOB_PATHNAME);
   if (current?.coins?.length) {
     await put(PREVIOUS_BLOB_PATHNAME, JSON.stringify(current), {
@@ -48,9 +60,13 @@ export async function saveScanSnapshot(snapshot: ScanSnapshot): Promise<void> {
 }
 
 export async function getLatestScan(): Promise<ScanSnapshot | null> {
-  return readSnapshot(BLOB_PATHNAME);
+  return readLatestCached();
 }
 
 export async function getPreviousScan(): Promise<ScanSnapshot | null> {
-  return readSnapshot(PREVIOUS_BLOB_PATHNAME);
+  return readPreviousCached();
+}
+
+export async function getLatestScanFresh(): Promise<ScanSnapshot | null> {
+  return readSnapshot(BLOB_PATHNAME);
 }

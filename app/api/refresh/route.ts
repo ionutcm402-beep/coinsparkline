@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { runScan, runScanForIds } from "@/lib/scanEngine";
-import { getLatestScan, saveScanSnapshot } from "@/lib/blobStorage";
+import { getLatestScanFresh, saveScanSnapshot } from "@/lib/blobStorage";
 import { evaluateAndDeliverAlerts } from "@/lib/alertEngine";
 import { getSupabaseAdminClient } from "@/lib/supabaseServer";
 
@@ -13,8 +13,6 @@ export async function GET(request: NextRequest) {
   const providedSecret = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : "";
   const configuredSecret = process.env.CRON_SECRET;
 
-  // Never accept secrets in the URL. Query strings can leak into logs, analytics,
-  // browser history and third-party observability systems.
   if (!configuredSecret) {
     return NextResponse.json({ error: "Refresh endpoint is not configured" }, { status: 503 });
   }
@@ -33,7 +31,7 @@ export async function GET(request: NextRequest) {
     const refreshed = await runScan(total, days, apiKey, offset, batchSize);
     if (refreshed.length === 0) return NextResponse.json({ error: "Scan returned no coins" }, { status: 500 });
 
-    const current = await getLatestScan();
+    const current = await getLatestScanFresh();
 
     let armedCoinIds: string[] = [];
     try {
@@ -47,8 +45,6 @@ export async function GET(request: NextRequest) {
     }
 
     const alreadyRefreshed = new Set(refreshed.map((coin) => coin.id));
-    // Keep targeted alert refreshes intentionally small so an unexpectedly large
-    // alert population cannot push the cron request into Vercel's hard timeout.
     const targetedIds = armedCoinIds.filter((id) => !alreadyRefreshed.has(id)).slice(0, 5);
     const targeted = targetedIds.length ? await runScanForIds(total, days, targetedIds, apiKey) : [];
     const refreshedAll = [...refreshed, ...targeted];
@@ -62,6 +58,7 @@ export async function GET(request: NextRequest) {
 
     const scannedAt = new Date().toISOString();
     await saveScanSnapshot({ coins, scannedAt });
+    revalidateTag("scan-snapshot", "max");
 
     let alertResult: Awaited<ReturnType<typeof evaluateAndDeliverAlerts>> | null = null;
     try {
@@ -78,21 +75,14 @@ export async function GET(request: NextRequest) {
       scannedAt,
       coinCount: coins.length,
       refreshedCount: refreshedAll.length,
-      generalRefreshedCount: refreshed.length,
-      targetedAlertRefreshedCount: targeted.length,
-      targetedAlertCoinIds: targeted.map((coin) => coin.id),
-      armedCoinCount: armedCoinIds.length,
-      totalTarget: total,
-      offset,
-      batchSize,
-      days,
+      nextOffset: (offset + batchSize) % total,
       alerts: alertResult,
       durationMs: Date.now() - startedAt,
     });
-  } catch (err) {
-    return NextResponse.json({
-      error: err instanceof Error ? err.message : "Unknown error",
-      durationMs: Date.now() - startedAt,
-    }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Refresh failed" },
+      { status: 500 }
+    );
   }
 }
