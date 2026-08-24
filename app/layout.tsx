@@ -16,6 +16,21 @@ import "../styles/accessibility.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import PWARegister from "@/components/PWARegister";
-export const metadata:Metadata={title:"CoinSparkLine — See the market before it feels obvious.",description:"A clearer way to see crypto market behaviour, momentum and regime change.",manifest:"/manifest.webmanifest",applicationName:"CoinSparkLine",appleWebApp:{capable:true,title:"CoinSparkLine",statusBarStyle:"default"},icons:{icon:"/pwa-icon.svg",apple:"/pwa-icon.svg"},formatDetection:{telephone:false}};
+
+const siteUrl="https://coinsparkline.vercel.app";
+const description="CoinSparkLine interprets changes in crypto market behaviour with SparkScore, regime intelligence and research tools.";
+export const metadata:Metadata={
+ metadataBase:new URL(siteUrl),
+ title:{default:"CoinSparkLine — Crypto market behaviour, interpreted",template:"%s | CoinSparkLine"},
+ description,
+ alternates:{canonical:"/"},
+ manifest:"/manifest.webmanifest",
+ applicationName:"CoinSparkLine",
+ appleWebApp:{capable:true,title:"CoinSparkLine",statusBarStyle:"default"},
+ icons:{icon:"/icon.svg",apple:"/pwa-icon.svg"},
+ openGraph:{type:"website",siteName:"CoinSparkLine",url:siteUrl,title:"CoinSparkLine — Crypto market behaviour, interpreted",description,images:[{url:"/opengraph-image",width:1200,height:630,alt:"CoinSparkLine market intelligence"}]},
+ twitter:{card:"summary_large_image",title:"CoinSparkLine — Crypto market behaviour, interpreted",description,images:["/opengraph-image"]},
+ formatDetection:{telephone:false}
+};
 export const viewport:Viewport={themeColor:"#2457d6",width:"device-width",initialScale:1,viewportFit:"cover"};
 export default function RootLayout({children}:LayoutProps<"/">){return <html lang="en" className="h-full"><body id="top" className="csl-app min-h-full flex flex-col antialiased"><CurrencyProvider>{children}<PWARegister/><CookieConsent/></CurrencyProvider></body></html>}
