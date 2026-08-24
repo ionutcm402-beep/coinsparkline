@@ -28,19 +28,38 @@ export default function ScannerCard({ coin }: { coin: Coin }) {
   },[open]);
 
   return <>
-    <article className="group relative overflow-hidden rounded-[13px] border border-slate-200/70 bg-white/88 text-center shadow-[0_4px_14px_rgba(20,35,75,0.025)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-[0_9px_22px_rgba(20,35,75,0.065)]">
-      <div className="absolute right-1.5 top-1.5 z-10 scale-90"><WatchlistButton coinId={coin.id} compact/></div>
-      <Link href={`/coin/${coin.id}`} className="block px-2.5 pb-2 pt-3">
-        <div className="flex items-center justify-center gap-1.5 pr-6">{coin.logoUrl?<img src={coin.logoUrl} alt="" className="h-5 w-5 rounded-full object-contain"/>:<span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[6px] font-bold text-slate-500">{coin.symbol.slice(0,3)}</span>}<div className="min-w-0 text-left"><p className="truncate text-[11px] font-semibold leading-none text-slate-900">{coin.name}</p><p className="mt-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-slate-400">{coin.symbol}</p></div></div>
-        <div className="mt-2 flex items-baseline justify-center gap-1.5"><p className="truncate text-[14px] font-semibold leading-none tracking-[-0.03em] text-slate-950"><CurrencyAmount usd={coin.price}/></p><p className={`text-[8px] font-medium ${positive?"text-emerald-600":"text-rose-600"}`}>{positive?"+":""}{coin.change24hPct.toFixed(2)}%</p></div>
-        <div className="mt-2 flex items-center justify-between rounded-md bg-slate-950 px-2 py-1 text-white"><span className="text-[7px] font-bold uppercase tracking-[0.08em]">Spark {spark.score}</span><span className="text-[7px] text-slate-300">{spark.label}</span></div>
-        <div className={`mt-1.5 rounded-md ${config.bg} px-2 py-1`}><div className="flex items-center justify-between gap-1"><p className={`text-[7px] font-bold tracking-[0.08em] ${config.text}`}>{config.label.toUpperCase()}</p><p className={`text-[7px] ${config.text} opacity-70`}>{coin.confidencePct.toFixed(0)}%</p></div><div className="mt-1 h-[2px] overflow-hidden rounded-full bg-white/70"><div className="h-full rounded-full" style={{width:`${coin.confidencePct}%`,backgroundColor:config.dot}}/></div></div>
+    <article className="premium-scanner-card group relative overflow-hidden text-left">
+      <div className="absolute right-3 top-3 z-10"><WatchlistButton coinId={coin.id} compact/></div>
+      <Link href={`/coin/${coin.id}`} className="block px-4 pb-3 pt-4 sm:px-5 sm:pb-4 sm:pt-5">
+        <div className="flex items-center gap-3 pr-9">
+          {coin.logoUrl?<img src={coin.logoUrl} alt="" className="h-9 w-9 rounded-full object-contain shadow-sm"/>:<span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-500">{coin.symbol.slice(0,3)}</span>}
+          <div className="min-w-0 flex-1"><p className="truncate text-[13px] font-bold tracking-[-0.02em] text-slate-950 sm:text-[14px]">{coin.name}</p><p className="mt-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-slate-400">{coin.symbol}</p></div>
+        </div>
+
+        <div className="mt-5 flex items-end justify-between gap-3">
+          <div><p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Price</p><p className="mt-1 truncate text-[19px] font-semibold leading-none tracking-[-0.045em] text-slate-950 sm:text-[21px]"><CurrencyAmount usd={coin.price}/></p></div>
+          <p className={`rounded-full px-2.5 py-1 text-[9px] font-bold ${positive?"bg-emerald-50 text-emerald-600":"bg-rose-50 text-rose-600"}`}>{positive?"+":""}{coin.change24hPct.toFixed(2)}%</p>
+        </div>
+
+        <div className="mt-5 rounded-[16px] bg-[#0b0b10] px-3.5 py-3 text-white shadow-[0_12px_28px_rgba(15,23,42,.13)]">
+          <div className="flex items-center justify-between gap-2"><span className="text-[8px] font-bold uppercase tracking-[0.14em] text-white/65">SparkScore</span><span className="text-[9px] font-semibold text-white/65">{spark.label}</span></div>
+          <div className="mt-1 flex items-end justify-between gap-2"><span className="text-[24px] font-black leading-none tracking-[-0.055em]">{spark.score}</span><span className="pb-0.5 text-[8px] font-semibold text-white/50">/ 100</span></div>
+        </div>
+
+        <div className={`mt-3 rounded-[15px] ${config.bg} px-3.5 py-3`}>
+          <div className="flex items-center justify-between gap-2"><p className={`text-[8px] font-extrabold uppercase tracking-[0.12em] ${config.text}`}>{config.label}</p><p className={`text-[9px] font-semibold ${config.text} opacity-75`}>{coin.confidencePct.toFixed(0)}% confidence</p></div>
+          <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-white/75"><div className="h-full rounded-full" style={{width:`${coin.confidencePct}%`,backgroundColor:config.dot}}/></div>
+        </div>
       </Link>
-      <div className="mb-1.5 flex items-center justify-center gap-1 px-1.5"><button type="button" onClick={()=>setOpen(true)} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[8px] font-semibold text-slate-600 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700">Why?</button><AlertRuleButton coinId={coin.id} compact/></div>
+
+      <div className="flex items-center gap-2 border-t border-slate-100/80 px-3.5 py-3 sm:px-4">
+        <button type="button" onClick={()=>setOpen(true)} className="premium-card-action flex-1">Why this signal?</button>
+        <div className="flex-1 [&>button]:w-full [&>button]:min-h-[34px] [&>button]:rounded-full [&>button]:border [&>button]:border-slate-200/80 [&>button]:bg-white [&>button]:px-3 [&>button]:text-[9px] [&>button]:font-bold [&>button]:text-slate-600 [&>button]:shadow-[0_4px_12px_rgba(15,23,42,.035)] [&>button]:transition-all hover:[&>button]:-translate-y-px hover:[&>button]:border-indigo-200 hover:[&>button]:text-indigo-600"><AlertRuleButton coinId={coin.id} compact/></div>
+      </div>
     </article>
 
     {open&&<div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-[2px]" onMouseDown={()=>setOpen(false)}>
-      <section role="dialog" aria-modal="true" aria-label={`${coin.name} signal explanation`} onMouseDown={e=>e.stopPropagation()} className="max-h-[88vh] w-full max-w-[560px] overflow-y-auto rounded-[22px] border border-white/70 bg-white p-5 text-left shadow-[0_30px_90px_rgba(15,23,42,.28)] sm:p-6">
+      <section role="dialog" aria-modal="true" aria-label={`${coin.name} signal explanation`} onMouseDown={e=>e.stopPropagation()} className="max-h-[88vh] w-full max-w-[560px] overflow-y-auto rounded-[24px] border border-white/70 bg-white p-5 text-left shadow-[0_30px_90px_rgba(15,23,42,.28)] sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">{coin.logoUrl?<img src={coin.logoUrl} alt="" className="h-10 w-10 rounded-full object-contain"/>:<span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xs font-bold">{coin.symbol.slice(0,3)}</span>}<div><p className="text-[18px] font-extrabold text-slate-950">{coin.name}</p><p className="mt-0.5 text-[10px] font-bold uppercase tracking-[.12em] text-slate-400">{coin.symbol} · Why this signal?</p></div></div>
           <button onClick={()=>setOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-500 hover:bg-slate-50">×</button>
