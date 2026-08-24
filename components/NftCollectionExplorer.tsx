@@ -1,0 +1,115 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import type { NftCollection } from "@/lib/nftData";
+
+type SortKey = "trending" | "volume" | "floor" | "sales";
+
+function fmt(n: number | null, digits = 2) {
+  return n == null ? "—" : n.toLocaleString(undefined, { maximumFractionDigits: digits });
+}
+
+function Arrow() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden="true">
+      <path d="M6 14 14 6M8 6h6v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function median(values: number[]) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+export default function NftCollectionExplorer({ collections }: { collections: NftCollection[] }) {
+  const [sort, setSort] = useState<SortKey>("trending");
+  const [chain, setChain] = useState("All");
+  const [query, setQuery] = useState("");
+
+  const chains = useMemo(() => ["All", ...Array.from(new Set(collections.map((item) => item.chain))).sort()], [collections]);
+  const typicalFloor = useMemo(() => median(collections.map((item) => item.floor).filter((n): n is number => n != null && n > 0)), [collections]);
+  const outlierThreshold = typicalFloor > 0 ? Math.max(typicalFloor * 20, 100) : 100;
+
+  const displayed = useMemo(() => {
+    const filtered = collections.filter((item) => {
+      const chainMatch = chain === "All" || item.chain === chain;
+      const q = query.trim().toLowerCase();
+      const searchMatch = !q || item.name.toLowerCase().includes(q) || item.slug.toLowerCase().includes(q);
+      return chainMatch && searchMatch;
+    });
+
+    return [...filtered].sort((a, b) => {
+      if (sort === "floor") return (b.floor ?? -1) - (a.floor ?? -1);
+      if (sort === "sales") return (b.sales24h ?? -1) - (a.sales24h ?? -1);
+      return (b.volume24h ?? -1) - (a.volume24h ?? -1);
+    });
+  }, [collections, chain, query, sort]);
+
+  const tabs: { key: SortKey; label: string }[] = [
+    { key: "trending", label: "Trending" },
+    { key: "volume", label: "Top Volume" },
+    { key: "floor", label: "Highest Floor" },
+    { key: "sales", label: "Most Sales" },
+  ];
+
+  return (
+    <>
+      <div className="mt-6 rounded-[26px] border border-slate-100 bg-white/90 p-3 shadow-sm">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map((tab) => (
+              <button key={tab.key} onClick={() => setSort(tab.key)} className={`rounded-full px-4 py-2 text-xs font-extrabold transition ${sort === tab.key ? "bg-slate-950 text-white shadow-md" : "bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <select aria-label="Filter by network" value={chain} onChange={(e) => setChain(e.target.value)} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400">
+              {chains.map((item) => <option key={item} value={item}>{item === "All" ? "All networks" : item}</option>)}
+            </select>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search collections…" className="min-w-[220px] rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-400" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between px-1 text-[10px] font-semibold text-slate-400">
+        <span>{displayed.length} collection{displayed.length === 1 ? "" : "s"}</span>
+        <span>Live feed · refreshes about every 5 min</span>
+      </div>
+
+      {displayed.length ? (
+        <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {displayed.map((collection, index) => {
+            const floorOutlier = collection.floor != null && collection.floor > outlierThreshold;
+            return (
+              <article key={`${collection.chain}-${collection.slug}`} className="group overflow-hidden rounded-[30px] border border-slate-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-100">
+                  {collection.image ? <img src={collection.image} alt={collection.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]" /> : <div className="flex h-full items-center justify-center text-4xl font-black text-indigo-200">NFT</div>}
+                  <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[9px] font-black uppercase tracking-[.12em] text-slate-700 shadow-sm backdrop-blur">#{index + 1} · {collection.chain}</div>
+                  {floorOutlier && <div className="absolute right-3 top-3 rounded-full bg-amber-50/95 px-3 py-1 text-[9px] font-black uppercase tracking-[.08em] text-amber-700 shadow-sm">Floor outlier</div>}
+                </div>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0"><h3 className="truncate text-xl font-black text-slate-950">{collection.name}</h3><p className="mt-1 truncate text-xs text-slate-400">{collection.slug}</p></div>
+                    <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[9px] font-black text-indigo-600">OpenSea</span>
+                  </div>
+                  <div className="mt-5 grid grid-cols-3 gap-2">
+                    <div className={`rounded-2xl p-3 ${floorOutlier ? "bg-amber-50" : "bg-slate-50"}`}><span className="text-[9px] font-semibold text-slate-400">Floor</span><b className="mt-1 block text-sm text-slate-900">{fmt(collection.floor)} Ξ</b>{floorOutlier && <span className="mt-1 block text-[8px] font-bold text-amber-700">Verify on marketplace</span>}</div>
+                    <div className="rounded-2xl bg-slate-50 p-3"><span className="text-[9px] font-semibold text-slate-400">24h volume</span><b className="mt-1 block text-sm text-slate-900">{fmt(collection.volume24h)} Ξ</b></div>
+                    <div className="rounded-2xl bg-slate-50 p-3"><span className="text-[9px] font-semibold text-slate-400">24h sales</span><b className="mt-1 block text-sm text-slate-900">{fmt(collection.sales24h, 0)}</b></div>
+                  </div>
+                  <a href={collection.marketplaceUrl} target="_blank" rel="noopener noreferrer" className="csl-btn-soft mt-4 w-full">Explore on OpenSea <Arrow /></a>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mt-5 rounded-[28px] border border-slate-100 bg-white p-8 text-center"><p className="font-black text-slate-900">No collections match these filters.</p><button onClick={() => { setQuery(""); setChain("All"); }} className="mt-3 text-xs font-bold text-blue-600">Clear filters</button></div>
+      )}
+    </>
+  );
+}
