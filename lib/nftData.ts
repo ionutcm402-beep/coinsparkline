@@ -217,7 +217,7 @@ export async function getNftCollections(): Promise<NftCollection[]> {
 
   let seedRows: any[] = [];
   const sources = [
-    "/collections/trending?limit=12&timeframe=ONE_DAY",
+    "/collections/trending?limit=12&timeframe=one_day",
     "/collections/top?limit=12",
   ];
 
@@ -246,7 +246,7 @@ export async function getNftApiHealth() {
     return { configured: false, ok: false, status: 503, message: "OPENSEA_API_KEY is not configured." };
   }
 
-  const endpoint = "/collections/trending?limit=5&timeframe=ONE_DAY";
+  const endpoint = "/collections/trending?limit=5&timeframe=one_day";
   try {
     const payload = await openSea(endpoint);
     const rows = rankingRows(payload);
