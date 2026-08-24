@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { runScan } from "@/lib/scanEngine";
+import { runScan, runScanForIds } from "@/lib/scanEngine";
 import { getLatestScan, saveScanSnapshot } from "@/lib/blobStorage";
 import { evaluateAndDeliverAlerts } from "@/lib/alertEngine";
+import { getSupabaseAdminClient } from "@/lib/supabaseServer";
 
 export const maxDuration = 60;
 
@@ -27,8 +28,25 @@ export async function GET(request: NextRequest) {
     if (refreshed.length === 0) return NextResponse.json({ error: "Scan returned no coins" }, { status: 500 });
 
     const current = await getLatestScan();
+
+    let armedCoinIds: string[] = [];
+    try {
+      const supabase = getSupabaseAdminClient();
+      if (supabase) {
+        const { data } = await supabase.from("alert_rules").select("coin_id").eq("enabled", true);
+        armedCoinIds = Array.from(new Set((data ?? []).map((row) => String(row.coin_id))));
+      }
+    } catch {
+      armedCoinIds = [];
+    }
+
+    const alreadyRefreshed = new Set(refreshed.map((coin) => coin.id));
+    const targetedIds = armedCoinIds.filter((id) => !alreadyRefreshed.has(id)).slice(0, 10);
+    const targeted = targetedIds.length ? await runScanForIds(total, days, targetedIds, apiKey) : [];
+    const refreshedAll = [...refreshed, ...targeted];
+
     const merged = new Map((current?.coins ?? []).map((coin) => [coin.id, coin] as const));
-    for (const coin of refreshed) merged.set(coin.id, coin);
+    for (const coin of refreshedAll) merged.set(coin.id, coin);
 
     const coins = Array.from(merged.values())
       .sort((a, b) => (a.marketCapRank ?? 999999) - (b.marketCapRank ?? 999999))
@@ -51,7 +69,11 @@ export async function GET(request: NextRequest) {
       success: true,
       scannedAt,
       coinCount: coins.length,
-      refreshedCount: refreshed.length,
+      refreshedCount: refreshedAll.length,
+      generalRefreshedCount: refreshed.length,
+      targetedAlertRefreshedCount: targeted.length,
+      targetedAlertCoinIds: targeted.map((coin) => coin.id),
+      armedCoinCount: armedCoinIds.length,
       totalTarget: total,
       offset,
       batchSize,
