@@ -1,2 +1,2 @@
 import {redirect} from "next/navigation";
-export default function AlertsPage(){redirect("/signals?tab=alerts")}
+export default function AlertsPage(){redirect("/portfolio")}
