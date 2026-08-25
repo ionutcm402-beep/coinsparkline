@@ -25,14 +25,26 @@ const securityHeaders = [
   },
 ];
 
+const legacyRedirects = [
+  "/market",
+  "/live",
+  "/radar",
+  "/screener",
+  "/compare",
+  "/watchlist",
+  "/app/watchlist",
+  "/alerts",
+  "/signals",
+  "/privacy-coins",
+  "/nft-intelligence",
+];
+
 const nextConfig: NextConfig = {
   async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: securityHeaders,
-      },
-    ];
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
+  async redirects() {
+    return legacyRedirects.map((source) => ({ source, destination: "/crypto", permanent: false }));
   },
 };
 
