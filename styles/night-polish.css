@@ -1,0 +1,37 @@
+/* Final night-mode polish: premium dark navy, clearer hierarchy, softer panels. */
+html[data-theme="night"]{--bg:#090d14;--panel:#111824;--ink:#f5f8fc;--muted:#a7b2c2;--line:#253044;--blue:#78a7ff;--green:#55ddb0;--red:#ff7d91;--amber:#f0b45a;--shadow:0 20px 60px rgba(0,0,0,.34);color-scheme:dark}
+html[data-theme="night"] body{background:#090d14}
+html[data-theme="night"] .clean2030{background:radial-gradient(circle at 50% -10%,rgba(65,118,255,.15),transparent 31%),linear-gradient(180deg,#0c111b 0%,#090d14 48%,#080c12 100%)}
+html[data-theme="night"] .clean2030-top{background:rgba(9,13,20,.92);border-bottom-color:#202a3a;box-shadow:0 10px 35px rgba(0,0,0,.16)}
+html[data-theme="night"] .clean2030-brand{color:#f8fbff}
+html[data-theme="night"] .clean2030-brand span{color:#78a7ff}
+html[data-theme="night"] .clean2030-nav,html[data-theme="night"] .clean2030-currency{background:#121a26;border-color:#263247}
+html[data-theme="night"] .clean2030-nav a,html[data-theme="night"] .clean2030-currency button{color:#aab6c7}
+html[data-theme="night"] .clean2030-nav a[data-active=true],html[data-theme="night"] .clean2030-currency button[data-active=true]{background:#25334a;color:#fff;box-shadow:inset 0 0 0 1px rgba(120,167,255,.12)}
+html[data-theme="night"] .clean2030-theme{background:#172131;border-color:#2a3850;color:#eef5ff}
+html[data-theme="night"] .clean2030-login{background:#edf4ff;color:#0a111d}
+html[data-theme="night"] .clean2030-head p{color:#b1bccb}
+html[data-theme="night"] .clean2030-live{background:#111a27;border-color:#29374b;color:#62e3b7}
+html[data-theme="night"] .clean2030-summary div{background:linear-gradient(180deg,#141c29,#111823);border-color:#263248;box-shadow:0 10px 28px rgba(0,0,0,.14)}
+html[data-theme="night"] .clean2030-summary span{color:#9eabbd}
+html[data-theme="night"] .clean2030-summary strong{color:#f4f8ff}
+html[data-theme="night"] .clean2030-panel,html[data-theme="night"] .clean2030-nft-card,html[data-theme="night"] .clean2030-auth-card{background:linear-gradient(180deg,rgba(18,26,38,.98),rgba(14,21,31,.98));border-color:#273349;box-shadow:0 18px 50px rgba(0,0,0,.24)}
+html[data-theme="night"] .clean2030-toolbar{border-color:#263247}
+html[data-theme="night"] .clean2030-filters{background:#0d141f;border:1px solid #222e41}
+html[data-theme="night"] .clean2030-filters button{color:#9eabbd}
+html[data-theme="night"] .clean2030-filters button[data-active=true]{background:#25334a;color:#fff;box-shadow:none}
+html[data-theme="night"] .clean2030-list-head{color:#8998ad}
+html[data-theme="night"] .clean2030-row{border-top-color:#222d3e;color:#edf3fb}
+html[data-theme="night"] .clean2030-row:hover,html[data-theme="night"] .clean2030-row[data-selected=true]{background:#172233}
+html[data-theme="night"] .clean2030-row[data-selected=true]{box-shadow:inset 3px 0 0 #78a7ff}
+html[data-theme="night"] .clean2030-asset small{color:#a1adbd}
+html[data-theme="night"] .clean2030-score,html[data-theme="night"] .clean2030-why-asset>strong{color:#78a7ff;text-shadow:0 0 24px rgba(120,167,255,.12)}
+html[data-theme="night"] .clean2030-why-context span{background:#1b2738;color:#b7c3d3;border:1px solid #29374b}
+html[data-theme="night"] .clean2030-why-lead,html[data-theme="night"] .clean2030-factor-list article p{color:#aeb9c8}
+html[data-theme="night"] .clean2030-factor-list article{border-color:#273349}
+html[data-theme="night"] .clean2030-factor-track{background:#263247}
+html[data-theme="night"] .clean2030-why-note,html[data-theme="night"] .clean2030-note{background:#142139;color:#b9c6d8;border:1px solid #263b61}
+html[data-theme="night"] .clean2030-risk-footer{border-color:#253044}
+html[data-theme="night"] .clean2030-risk-footer p,html[data-theme="night"] .clean2030-risk-footer a{color:#9fabbc}
+html[data-theme="night"] [data-dir=up]{color:#55ddb0}
+html[data-theme="night"] [data-dir=down]{color:#ff7d91}
