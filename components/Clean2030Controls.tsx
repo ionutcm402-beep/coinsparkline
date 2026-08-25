@@ -12,8 +12,8 @@ export default function Clean2030Controls(){
   const saved=window.localStorage.getItem("csl-theme");const next=saved==="night"?"night":"day";setTheme(next);document.documentElement.dataset.theme=next;
   const supabase=getSupabaseBrowserClient();
   void supabase.auth.getUser().then(({data})=>setEmail(data.user?.email||null));
-  const{sub}=supabase.auth.onAuthStateChange((_event,session)=>setEmail(session?.user.email||null)).data;
-  return()=>sub.subscription.unsubscribe();
+  const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>setEmail(session?.user.email||null));
+  return()=>subscription.unsubscribe();
  },[]);
  function toggleTheme(){const next=theme==="day"?"night":"day";setTheme(next);window.localStorage.setItem("csl-theme",next);document.documentElement.dataset.theme=next}
  async function signOut(){await getSupabaseBrowserClient().auth.signOut();setEmail(null);window.location.href="/crypto"}
