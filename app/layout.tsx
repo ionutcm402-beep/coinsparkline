@@ -5,6 +5,7 @@ import "../styles/clean-2030-extras.css";
 import "../styles/coin-profile-2030.css";
 import "../styles/auth-fixes.css";
 import "../styles/launch-qa.css";
+import "../styles/night-polish.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
 import MarketRiskWelcome from "@/components/MarketRiskWelcome";
