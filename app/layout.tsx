@@ -2,6 +2,7 @@ import type {Metadata,Viewport} from "next";
 import "./globals.css";
 import "../styles/clean-2030.css";
 import "../styles/clean-2030-extras.css";
+import "../styles/clean-2030-center-fix.css";
 import "../styles/coin-profile-2030.css";
 import {CurrencyProvider} from "@/components/CurrencyProvider";
 import CookieConsent from "@/components/CookieConsent";
