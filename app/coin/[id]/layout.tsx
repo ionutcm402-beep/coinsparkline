@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import type {Metadata} from "next";
-import CoinPageWatchlistDock from "@/components/CoinPageWatchlistDock";
 import {routeMetadata} from "@/lib/seo";
 
 export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{
@@ -9,5 +8,5 @@ export async function generateMetadata({params}:{params:Promise<{id:string}>}):P
 }
 
 export default function CoinDetailLayout({ children }: { children: ReactNode }) {
-  return <>{children}<CoinPageWatchlistDock /></>;
+  return <>{children}</>;
 }
